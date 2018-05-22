@@ -15,7 +15,7 @@ deploy:
   - provider: pypi
     user: ${PYPI_USER}
     password: ${PYPI_PASSWORD}
-    server: https://test.pypi.org
+    server: https://testpypi.python.org/pypi
     on:
       branch: master
   - provider: pypi
