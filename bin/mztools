@@ -1,0 +1,280 @@
+#!/usr/bin/python3
+# coding=utf-8
+
+import os
+import sys
+import argparse
+from termcolor import colored
+
+from mztools.ver import __version__
+from mztools import status
+from mztools import put
+from mztools import get
+from mztools import delete
+from mztools import deploy
+from mztools import build
+from mztools import version
+from mztools import lists
+from mztools import dev
+from mztools import log
+
+# Main argument parser
+parser = argparse.ArgumentParser()
+parser.add_argument('-v', '--version',
+                    action='version',
+                    version='%(prog)s {version}'.format(version=__version__))
+subparsers = parser.add_subparsers()
+
+# Subparsers
+status_parser = subparsers.add_parser(
+    'status',
+    help='View status')
+status_parser.set_defaults(func=status.run_status)
+status_parser.add_argument('-e', '--environment',
+                           choices=['dev', 'test', 'prod'],
+                           help='Get status from which environment')
+status_parser.add_argument('-v', '--verbose',
+                           action='store_true',
+                           help='Verbose output')
+put_parser = subparsers.add_parser(
+    'put',
+    help='Put files into your environment')
+put_parser.set_defaults(func=put.run_put)
+# put_parser.add_argument('-p', '--package',
+#                         metavar='file',
+#                         nargs='+',
+#                         help='MZ Packages (.mzp)')
+put_parser.add_argument('-c', '--config',
+                        metavar='file',
+                        nargs='+',
+                        help='MZ Config/System backup (.zip)')
+# put_parser.add_argument('-s', '--script',
+#                         metavar='file',
+#                         nargs='+',
+#                         help='MZ Scripts (.sh)')
+put_parser.add_argument('-e', '--extref',
+                        metavar='file',
+                        nargs='+',
+                        help='MZ External References (.txt)')
+put_parser.add_argument('-f', '--file',
+                        metavar='file',
+                        nargs='+',
+                        help='MZ Generic file (.*)')
+put_parser.add_argument('-pm', '--python-module',
+                        metavar='folder',
+                        nargs='+',
+                        help='Python module (folder)')
+put_parser.add_argument('-pr', '--python-requirement',
+                        metavar='file',
+                        nargs='+',
+                        help='Python requirements (.txt)')
+get_parser = subparsers.add_parser(
+    'get',
+    help='Get files from your environment')
+get_parser.set_defaults(func=get.run_get)
+# get_parser.add_argument('-p', '--package',
+#                         metavar='file',
+#                         nargs='+',
+#                         help='MZ Packages (.mzp)')
+get_parser.add_argument('-c', '--config',
+                        metavar='file',
+                        nargs='+',
+                        help='MZ Config/System backup (.zip), provide - all to download all files')
+# get_parser.add_argument('-s', '--script',
+#                         metavar='file',
+#                         nargs='+',
+#                         help='MZ Scripts (.sh)')
+get_parser.add_argument('-e', '--extref',
+                        metavar='file',
+                        nargs='+',
+                        help='MZ External References (.txt), provide - all to download all files')
+get_parser.add_argument('-f', '--file',
+                        metavar='file',
+                        nargs='+',
+                        help='MZ Generic file (.*), provide - all to download all files')
+get_parser.add_argument('-pm', '--python-module',
+                        metavar='folder',
+                        nargs='+',
+                        help='Python module (folder), provide - all to download all files')
+get_parser.add_argument('-pr', '--python-requirement',
+                        metavar='file',
+                        nargs='+',
+                        help='Python requirements (.txt), provide - all to download all files')
+delete_parser = subparsers.add_parser(
+    'delete',
+    help='Delete files in your environment')
+delete_parser.set_defaults(func=delete.run_delete)
+# delete_parser.add_argument('-p', '--package',
+#                            metavar='file',
+#                            nargs='+')
+delete_parser.add_argument('-c', '--config',
+                           metavar='file',
+                           nargs='+')
+# delete_parser.add_argument('-s', '--script',
+#                            metavar='file',
+#                            nargs='+')
+delete_parser.add_argument('-e', '--extref',
+                           metavar='file',
+                           nargs='+')
+delete_parser.add_argument('-f', '--file',
+                           metavar='file',
+                           nargs='+')
+delete_parser.add_argument('-pm', '--python-module',
+                           metavar='file',
+                           nargs='+')
+delete_parser.add_argument('-pr', '--python-requirement',
+                           metavar='file',
+                           nargs='+')
+list_parser = subparsers.add_parser(
+    'list',
+    help='List files')
+list_parser.set_defaults(func=lists.run_list)
+# list_parser.add_argument('-p', '--package',
+#                          action='store_true',
+#                          nargs='+')
+list_parser.add_argument('-c', '--config',
+                         action='store_true',
+                         help='MZ Config/System backup (.zip)')
+# list_parser.add_argument('-s', '--script',
+#                          action='store_true',
+#                          help='MZ Scripts (.sh)')
+list_parser.add_argument('-e', '--extref',
+                         action='store_true',
+                         help='MZ External References (.txt)')
+list_parser.add_argument('-f', '--file',
+                         action='store_true',
+                         help='MZ Generic file (.*)')
+list_parser.add_argument('-pm', '--python-module',
+                         action='store_true',
+                         help='Python module (folder)')
+list_parser.add_argument('-pr', '--python-requirement',
+                         action='store_true',
+                         help='Python requirements (.txt)')
+
+version_parser = subparsers.add_parser(
+    'version',
+    help='List built versions')
+
+build_parser = subparsers.add_parser(
+    'build',
+    help='Build new container')
+build_parser.set_defaults(func=build.run_build)
+# build_parser.add_argument('-a', '--auto',
+#                           action='store_true',
+#                           help='Automatically create a version number')
+build_parser.add_argument('-v', '--version',
+                          nargs=1,
+                          metavar='N',
+                          help='Semantic version number <N.N.N>')
+build_parser.add_argument('-no-ec', '--no-ec',
+                          action='store_true',
+                          help='Skip build of the EC image')
+
+deploy_parser = subparsers.add_parser(
+    'deploy',
+    help='Deploy container to dev, test or production')
+deploy_parser.set_defaults(func=deploy.run_deploy)
+deploy_group = deploy_parser.add_mutually_exclusive_group(required=True)
+deploy_group.add_argument('-t', '--test',
+                          nargs=1,
+                          metavar='N',
+                          help='Deploy specified version <N.N.N> to test')
+deploy_group.add_argument('-p', '--promote',
+                          action='store_true',
+                          help='Promote test container to production')
+deploy_group.add_argument('-d', '--dev',
+                          nargs=1,
+                          metavar='N',
+                          help='Deploy specified version <N.N.N> to dev')
+deploy_parser.add_argument('-ec', '--ec',
+                           action='store_true',
+                           help='Also deploy the EC image')
+
+dev_parser = subparsers.add_parser(
+    'dev',
+    help='Manage you dev environment')
+dev_parser.set_defaults(func=dev.run_dev)
+dev_group = dev_parser.add_mutually_exclusive_group(required=True)
+dev_group.add_argument('-l', '--list',
+                       action='store_true')
+dev_group.add_argument('--put-extref',
+                       metavar='file',
+                       nargs='+',
+                       help='Upload extrefs file(s)')
+dev_group.add_argument('--get-extref',
+                       metavar='file',
+                       nargs='+',
+                       help='Download extrefs file(s)')
+dev_group.add_argument('--delete-extref',
+                       metavar='file',
+                       nargs='+',
+                       help='Delete extrefs file(s)')
+
+log_parser = subparsers.add_parser(
+    'log',
+    help='View logs')
+log_parser.set_defaults(func=log.run_log)
+log_parser.add_argument('-e', '--environment',
+                        choices=['dev', 'test', 'prod'],
+                        help='Get logs from which environment')
+log_parser.add_argument('--json',
+                        action='store_true',
+                        help='Json format to file')
+
+
+def help_header():
+    banner = "                _              _     \n"
+    banner += "  _ __ ___  ___| |_ ___   ___ | |___ \n"
+    banner += " | '_ ` _ \|_  / __/ _ \ / _ \| / __|\n"
+    banner += " | | | | | |/ /| || (_) | (_) | \__ \\\n"
+    banner += " |_| |_| |_/___|\__\___/ \___/|_|___/"
+    banner += "  " + __version__ + "\n"
+
+    print(colored(banner, "magenta"))
+    return
+
+
+# Check for no args
+if len(sys.argv) == 1:
+    help_header()
+    parser.print_help()
+    sys.exit(1)
+
+# Check for no args in subparsers
+if len(sys.argv) == 2:
+    if 'status' in sys.argv:
+        status_parser.print_help()
+        sys.exit(1)
+    if 'put' in sys.argv:
+        put_parser.print_help()
+        sys.exit(1)
+    if 'get' in sys.argv:
+        get_parser.print_help()
+        sys.exit(1)
+    if 'delete' in sys.argv:
+        delete_parser.print_help()
+        sys.exit(1)
+    if 'deploy' in sys.argv:
+        deploy_parser.print_help()
+        sys.exit(1)
+    if 'build' in sys.argv:
+        build_parser.print_help()
+        sys.exit(1)
+    if 'version' in sys.argv:
+        version.run_version()
+        sys.exit(1)
+    if 'list' in sys.argv:
+        lists.run_list(None)
+        sys.exit(1)
+    if 'dev' in sys.argv:
+        dev_parser.print_help()
+        sys.exit(1)
+    if 'log' in sys.argv:
+        log_parser.print_help()
+        sys.exit(1)
+
+# Parse args and run appropriate function
+args = parser.parse_args()
+args.func(args)
+
+sys.exit(0)
