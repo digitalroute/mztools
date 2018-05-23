@@ -16,7 +16,7 @@ def run_put(args):
     #     put_files(bucket, args.script, prefix='scripts')
     if args.extref:
         put_files(get_repo_bucket(), args.extref, prefix='extrefs')
-        print(colored('\nIn MZ, extrefs are located in /opt/extref after you build your image.', attrs=['dark']))
+        print(colored('\nExtrefs are located in /extrefs after you build your image.', attrs=['dark']))
     if args.file:
         put_files(get_general_bucket(), args.file, prefix='files')
     if args.python_module:
