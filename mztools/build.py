@@ -54,35 +54,40 @@ def trigger_build(version, ec):
             spin.stop()
             spin.join()
             print(colored('\n  Build successfull!\n', 'green'))
+            fetch_log(buildId)
+
+            print(colored('To deploy a new version run "mztools deploy"\n',
+                          attrs=['dark']))
+
             break
         elif status['buildStatus'] in failedStates:
             spin.stop()
             spin.join()
             print(colored('\n  Build failed!\n', 'red'))
-            print(colored('  Fetching logs', attrs=['bold']))
-            print('    Waiting for log stream to close...30', end='',
-                  flush=True)
-            seconds = 30
-            while seconds > 0:
-                sleep(1)
-                if seconds == 20:
-                    print('...20', end='', flush=True)
-                if seconds == 10:
-                    print('...10', end='', flush=True)
-                seconds -= 1
-
-            print('...done')
-            print('    Fetching log stream...', end='', flush=True)
-            logEvents = get_log_stream('/aws/codebuild/paas-platform-build')
-            fileName = buildId.split(':', maxsplit=1)[1] + '.log'
-            with open(fileName, 'w') as logFile:
-                for line in logEvents:
-                    logFile.write(line + '\n')
-            print('done')
-            print('    Please see log: "' + fileName + '"\n')
+            fetch_log(buildId)
             break
 
-    print(colored('To deploy a new version run "mztools deploy"\n',
-                  attrs=['dark']))
-
     return
+
+
+def fetch_log(buildId):
+    print(colored('  Fetching logs', attrs=['bold']))
+    print('    Waiting for log stream to close...30', end='', flush=True)
+    seconds = 30
+    while seconds > 0:
+        sleep(1)
+        if seconds == 20:
+            print('...20', end='', flush=True)
+        if seconds == 10:
+            print('...10', end='', flush=True)
+        seconds -= 1
+
+    print('...done')
+    print('    Fetching log stream...', end='', flush=True)
+    logEvents = get_log_stream('/aws/codebuild/paas-platform-build')
+    fileName = buildId.split(':', maxsplit=1)[1] + '.log'
+    with open(fileName, 'w') as logFile:
+        for line in logEvents:
+            logFile.write(line + '\n')
+    print('done')
+    print('    Please see log: "' + fileName + '"\n')
