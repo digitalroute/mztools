@@ -8,10 +8,11 @@ from .common import run_lambda, SpinCursor, poll_build
 
 
 def run_deploy(args):
-    if args.ec:
-        ec = True
-    else:
+    if args.no_ec:
         ec = False
+    else:
+        ec = True
+
     if args.test:
         print('Triggering deploy...\n')
         deploy_container(ec, 'test', args.test[0])
