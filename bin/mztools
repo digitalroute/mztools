@@ -8,6 +8,7 @@ from termcolor import colored
 
 from mztools.ver import __version__
 from mztools import status
+from mztools import info
 from mztools import put
 from mztools import get
 from mztools import delete
@@ -26,6 +27,11 @@ parser.add_argument('-v', '--version',
 subparsers = parser.add_subparsers()
 
 # Subparsers
+info_parser = subparsers.add_parser(
+    'info',
+    help='View info regarding current configured customer')
+info_parser.set_defaults(func=info.run_info)
+
 status_parser = subparsers.add_parser(
     'status',
     help='View status')
