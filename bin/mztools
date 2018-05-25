@@ -186,9 +186,9 @@ deploy_group.add_argument('-d', '--dev',
                           nargs=1,
                           metavar='N',
                           help='Deploy specified version <N.N.N> to dev')
-deploy_parser.add_argument('-ec', '--ec',
-                           action='store_true',
-                           help='Also deploy the EC image')
+deploy_group.add_argument('-no-ec', '--no-ec',
+                          action='store_true',
+                          help='Skip deploy of the EC image')
 
 dev_parser = subparsers.add_parser(
     'dev',
