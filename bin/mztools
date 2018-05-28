@@ -18,6 +18,7 @@ from mztools import version
 from mztools import lists
 from mztools import dev
 from mztools import log
+from mztools import restart
 
 # Main argument parser
 parser = argparse.ArgumentParser()
@@ -226,6 +227,16 @@ log_parser.add_argument('-e', '--environment',
 log_parser.add_argument('--json',
                         action='store_true',
                         help='Json format to file')
+restart_parser = subparsers.add_parser(
+    'restart',
+    help='Restart pico')
+restart_parser.set_defaults(func=restart.run_restart)
+restart_parser.add_argument('-e', '--environment',
+                           choices=['dev', 'test', 'prod'],
+                           help='The environmet in which the pico to be restarted resides')
+restart_parser.add_argument('-n', '--name',
+                           metavar='name',
+                           help='Get the name of pico to restart by using the status command with the verbose flag')
 
 
 def help_header():
@@ -277,6 +288,9 @@ if len(sys.argv) == 2:
         sys.exit(1)
     if 'log' in sys.argv:
         log_parser.print_help()
+        sys.exit(1)
+    if 'restart' in sys.argv:
+        restart_parser.print_help()
         sys.exit(1)
 
 # Parse args and run appropriate function

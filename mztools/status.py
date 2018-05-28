@@ -7,9 +7,9 @@ from .common import run_lambda
 
 # Containers to display
 containers = (
-    'platform',
-    'ec',
-    'wd'
+    'platform-',
+    'ec-',
+    'wd-'
 )
 
 
@@ -56,7 +56,7 @@ def get_status(args):
 
     try:
         for pod in response['status']:
-            if pod['name'].startswith(containers):
+            if pod['instance_name'].startswith(containers):
 
                 # Instance name
                 if verbose:
