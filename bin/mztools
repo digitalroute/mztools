@@ -196,6 +196,9 @@ deploy_group.add_argument('-d', '--dev',
 deploy_group.add_argument('-no-ec', '--no-ec',
                           action='store_true',
                           help='Skip deploy of the EC image')
+deploy_group.add_argument('-r', '--reset',
+                          action='store_true',
+                          help='In combination with --dev this would reset the database and stored config in dev.')
 
 dev_parser = subparsers.add_parser(
     'dev',
