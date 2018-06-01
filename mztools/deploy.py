@@ -29,6 +29,12 @@ def run_deploy(args):
         print('Promoting test to production...\n')
         deploy_container(ec, 'prod')
     if args.dev:
+
+        if args.reset:
+            reset = True
+        else:
+            reset = False
+
         print(colored(
             '\nThis will wipe all data in dev and deploy version: {}.'.format(
                 args.dev[0]
@@ -46,16 +52,17 @@ def run_deploy(args):
             verification = input(question)
 
         print('Resetting dev with version {}...\n'.format(args.dev[0]))
-        deploy_container(ec, 'dev', args.dev[0])
+        deploy_container(ec, 'dev', args.dev[0], reset)
 
     return
 
 
-def deploy_container(ec, environment=None, version=None):
+def deploy_container(ec, environment=None, version=None, reset=False):
     response = run_lambda('paas-tools-lambda_post-deploy', {
         'version': version,
         'env': environment,
-        'ec': ec
+        'ec': ec,
+        'reset': reset
     })
 
     if environment == 'prod':
