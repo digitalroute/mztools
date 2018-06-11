@@ -142,11 +142,33 @@ def get_log_stream(logGroup, prefix=None):
 
     # Get last log stream or prefixed log stream
     if prefix:
-        response = client.describe_log_streams(
-            logGroupName=logGroup,
-            logStreamNamePrefix=prefix,
-            limit=1
-        )
+        successfulFetch = False
+        nextToken = ''
+        while not successfulFetch:
+            if nextToken != '':
+                response = client.describe_log_streams(
+                    logGroupName=logGroup,
+                    orderBy='LastEventTime',
+                    nextToken=nextToken,
+                    descending=True,
+                    limit=50
+                )
+            else:
+                response = client.describe_log_streams(
+                    logGroupName=logGroup,
+                    orderBy='LastEventTime',
+                    descending=True,
+                    limit=50
+                )
+
+            for log in response['logStreams']:
+                if log['logStreamName'].startswith(prefix):
+                    response['logStreams'][0] = log
+                    successfulFetch = True
+                    break
+                else:
+                    nextToken = response['nextToken']
+
     else:
         response = client.describe_log_streams(
             logGroupName=logGroup,
