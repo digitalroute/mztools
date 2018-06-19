@@ -156,6 +156,9 @@ list_parser.add_argument('-pm', '--python-module',
 list_parser.add_argument('-pr', '--python-requirement',
                          action='store_true',
                          help='Python requirements (.txt)')
+list_parser.add_argument('-b', '--backup',
+                         action='store_true',
+                         help='Backup files (.zip)')
 
 version_parser = subparsers.add_parser(
     'version',

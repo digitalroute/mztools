@@ -204,10 +204,11 @@ def get_log_stream(logGroup, prefix=None):
     return(logEvents)
 
 
-def get_file_list(bucket, prefixList=None):
-    # Invoke list lambda tp get current uploaded versions
-    filesDict = run_lambda('paas-tools-lambda_get-list',
-        {'bucket': bucket, 'prefix': prefixList}
+def get_file_list(prefixList=None):
+    # Invoke list lambda to get current uploaded files
+    filesDict = run_lambda(
+        'paas-tools-lambda_get-list',
+        {'prefix': prefixList}
     )
 
     return(filesDict)
@@ -253,7 +254,7 @@ def get_files(bucket, files, prefix):
 
     for fileName in files:
         print('    ' + fileName, end='')
-        if prefix == 'files':
+        if prefix is 'files' or prefix is 'backups':
             key = fileName
         else:
             key = 'repo/' + prefix + '/' + fileName
