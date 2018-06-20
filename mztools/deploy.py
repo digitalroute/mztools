@@ -32,26 +32,25 @@ def run_deploy(args):
 
         if args.reset:
             reset = True
+            print(colored(
+                '\nThis will wipe all data in dev and deploy version: {}.'
+                .format(args.dev[0]),
+                attrs=['bold']
+                )
+            )
+            question = '\nAre you sure you want to reset the dev env? '
+            question += '[yes/no]: '
+            verification = input(question)
+            while verification != 'yes':
+                if verification == 'no':
+                    sys.exit(0)
+                print('Please answer "yes" or "no"')
+                verification = input(question)
+
+            print('Resetting dev with version {}...\n'.format(args.dev[0]))
         else:
             reset = False
 
-        print(colored(
-            '\nThis will wipe all data in dev and deploy version: {}.'.format(
-                args.dev[0]
-            ),
-            attrs=['bold']
-            )
-        )
-        question = '\nAre you sure you want to reset the dev env? '
-        question += '[yes/no]: '
-        verification = input(question)
-        while verification != 'yes':
-            if verification == 'no':
-                sys.exit(0)
-            print('Please answer "yes" or "no"')
-            verification = input(question)
-
-        print('Resetting dev with version {}...\n'.format(args.dev[0]))
         deploy_container(ec, 'dev', args.dev[0], reset)
 
     return
