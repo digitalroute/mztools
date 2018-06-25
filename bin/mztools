@@ -16,7 +16,6 @@ from mztools import deploy
 from mztools import build
 from mztools import version
 from mztools import lists
-from mztools import dev
 from mztools import log
 from mztools import restart
 
@@ -157,6 +156,9 @@ list_parser.add_argument('-pm', '--python-module',
 list_parser.add_argument('-pr', '--python-requirement',
                          action='store_true',
                          help='Python requirements (.txt)')
+list_parser.add_argument('-b', '--backup',
+                         action='store_true',
+                         help='Backup files (.zip)')
 
 version_parser = subparsers.add_parser(
     'version',
@@ -193,32 +195,12 @@ deploy_group.add_argument('-d', '--dev',
                           nargs=1,
                           metavar='N',
                           help='Deploy specified version <N.N.N> to dev')
-deploy_group.add_argument('-no-ec', '--no-ec',
-                          action='store_true',
-                          help='Skip deploy of the EC image')
-deploy_group.add_argument('-r', '--reset',
-                          action='store_true',
-                          help='In combination with --dev this would reset the database and stored config in dev.')
-
-dev_parser = subparsers.add_parser(
-    'dev',
-    help='Manage you dev environment')
-dev_parser.set_defaults(func=dev.run_dev)
-dev_group = dev_parser.add_mutually_exclusive_group(required=True)
-dev_group.add_argument('-l', '--list',
-                       action='store_true')
-dev_group.add_argument('--put-extref',
-                       metavar='file',
-                       nargs='+',
-                       help='Upload extrefs file(s)')
-dev_group.add_argument('--get-extref',
-                       metavar='file',
-                       nargs='+',
-                       help='Download extrefs file(s)')
-dev_group.add_argument('--delete-extref',
-                       metavar='file',
-                       nargs='+',
-                       help='Delete extrefs file(s)')
+deploy_parser.add_argument('-no-ec', '--no-ec',
+                           action='store_true',
+                           help='Skip deploy of the EC image')
+deploy_parser.add_argument('-r', '--reset',
+                           action='store_true',
+                           help='In combination with --dev this would reset the database and stored config in dev.')
 
 log_parser = subparsers.add_parser(
     'log',
@@ -285,9 +267,6 @@ if len(sys.argv) == 2:
         sys.exit(1)
     if 'list' in sys.argv:
         lists.run_list(None)
-        sys.exit(1)
-    if 'dev' in sys.argv:
-        dev_parser.print_help()
         sys.exit(1)
     if 'log' in sys.argv:
         log_parser.print_help()
