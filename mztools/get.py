@@ -56,9 +56,9 @@ def get_all_files(bucket, type):
         # Get only extrefs
         prefixList = [type]
 
-        filesDict = get_file_list(bucket, prefixList)
+        filesDict = get_file_list(prefixList)
     else:
-        filesDict = get_file_list(bucket)
+        filesDict = get_file_list()
 
     if len(filesDict[type]) > 0:
         for f in filesDict[type]:
