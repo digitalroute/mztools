@@ -5,7 +5,7 @@ from termcolor import colored
 
 
 def run_info(args):
-    print(colored('Customer: ',
+    print(colored('Company: ',
           'white', attrs=['bold']) + get_parameter('/customer/name'))
     print('')
 
