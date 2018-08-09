@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-import boto3
-import botocore
+
 from termcolor import colored
+from .common import get_parameter
 
 
 def run_info(args):
@@ -30,15 +30,3 @@ def run_info(args):
     print('Prod: ' + get_parameter('/prod/ec/version'))
 
     return
-
-
-def get_parameter(param):
-    try:
-        ssmClient = boto3.client('ssm')
-        response = ssmClient.get_parameter(
-            Name=param,
-            WithDecryption=False
-        )['Parameter']['Value']
-        return response
-    except botocore.exceptions.ClientError:
-        return '-'
