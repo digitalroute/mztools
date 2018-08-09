@@ -336,6 +336,17 @@ def delete_files(filesToDelete):
     return
 
 
+def get_parameter(param):
+    try:
+        ssmClient = boto3.client('ssm')
+        response = ssmClient.get_parameter(
+            Name=param,
+            WithDecryption=False
+        )['Parameter']['Value']
+        return response
+    except botocore.exceptions.ClientError:
+        return '-'
+
 def run_delete_operation(filesDict, verified=False):
 
     filesOperated = {}
