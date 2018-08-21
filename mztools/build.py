@@ -24,7 +24,7 @@ def trigger_build(version, ec):
     build_response = run_lambda('paas-tools-lambda_post-build',
                                 {'build': 'paas-platform-build',
                                  'version': version[0],
-                                 'ec': ec})
+                                 'ec': str(ec)})
 
     if 'error' in build_response:
         print(colored(build_response['error'], 'red'))
