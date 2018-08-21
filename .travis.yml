@@ -15,12 +15,14 @@ deploy:
   - provider: pypi
     skip_existing: true
     user: ${PYPI_USER}
-    password: ${PYPI_PASSWORD}
+    password:
+      secure: ${PYPI_PASSWORD}
     server: https://test.pypi.org/legacy/
     on:
       branch: master
   - provider: pypi
     user: ${PYPI_USER}
-    password: ${PYPI_PASSWORD}
+    password:
+      secure: ${PYPI_PASSWORD}
     on:
       tags: true
