@@ -10,7 +10,9 @@ install:
 # command to run
 script:
   - tox
-
+env:
+  global:
+    secure: T0NCC3sh7vN8H+aWz9N6stZUo5xBpIzCVdpmNS8oJLdCi8JC1/YUPZekfwpcFP8ASuyEC1Id0bp07jKBaEHCOAqEcGHiHNS9gtepd0+VIa3duJ4e1NQkZ8eLDJtB8IqV30BfrJ4MKWbPnVvx6EPY3+k6skdQItblR2TFRxhBdcR6gDAYws9+pytm6VUFim/19sAUgKE/19a/yOOWqB0M9EZENRbf5r6QMQzBenaCpzfhnehbVdHG6F1400g4qqGLNtNyPimByV9dzqN2/A96sMblRRwRmUcILCKONP8MYcuDW7p+kO4CETiWwQ7ylBummJVklBsxhWuQda2mCj5jHETKM0ExwP6JdTydYNB1n4gTcuDAde7v3GMuX+iu9wBY6W7Oo/xCysyRxztgXveOq5M/WMC0dyi6/Y5dIa1GiIgro5x0+WYUVeGkbuc4/205/CT3D7xHCOIEeqkRX6zqckFOd0qu3J/keRRgeFTCMFNnVyi7vpwmWo4Y+9SCGZMxwZvYXynuefOxI7x8fbhzbfjqdtVx7lvfPyntWUjGMHXf3bBGFocOdPpofD4w+WSeABBXXZD853Kzrfz4Rb9ZuF8PQ13f7HAGu8UamrFtE3nfWxHtGAqKwkBbku76yOyJYu8/tXuJx8d+2buns3mw5pZPE+h5ofKeJYb7gZsuIVk=
 deploy:
   - provider: pypi
     skip_existing: true
