@@ -10,21 +10,19 @@ install:
 # command to run
 script:
   - tox
-env:
-  global:
-    secure: QxL5Y09bGSY0TrdduLM0gZTkPtSTTMr/0BbUGoIMUafVCm+PRR0jUJA91byRMiA8eXKkQFPHN7/ZMa0AgWFwLL6RPIsN0J2XYLAoDvIDFrdlsYBHoaXpFGzMbArVgMkrcQkNiEyeltnrUBYM3n5RwbeeKPTW97EnHX8yaZB95RopJUKXu7viHfQ6GSWhpqDFk3wuJbi9XCXrBR6xtY8BDI92pqs2v8c/tHuuk6J8d2MnKHhveouECoCjnRqJWav64r3Z0CzIsokTRvKngJZh1f87AAHJQty6cbSiYRMWpGW3cKDvi1kzHTUUEmdmevVFthO/P4DW6zLR8I0blin9gXhfcEm1DQnIdU6X//J3XtROeSli57Gkj0KDh7E6q3mz0G/SwsFV4Ay30yy9mzY97RDf1aZx3A2S2AzjPFi8dAY/kh9Q146aMaLkC2Ti0yVqCwwY96jO0uviQSeM9YG2J/A5aPhILI9wEvrYsUMbL75jQMGf31gHNAdW/uCX2lCnh2BdXK6pIM/k7cyFdlBxE0PeoaY+1JKBaIaGCgU0p6139PIKJ7TRKqZweye8ROLI4Z7DPGGoHFbbwPyYhXA9/3gFgQ2a1gxCV4BQm6LtzOpAr8hWWNDPApmGiQIQdmk8tCaEH5ijD/M3y2bDzKu9kRdmEwLbYjyLf0Co7iHTi9A=
+
 deploy:
   - provider: pypi
     skip_existing: true
     user: ${PYPI_USER}
     password:
-      secure: ${PYPI_PASSWORD}
+      secure: qcOL9OSjb7dykdQpqBjAYU4kEyBRtCnZcRJ1QgCTVoYy8HB7f00fFZCdEsOvdHK3hxN/+JQoNFIxq8/havWmKiysWh1jGQO9ydrIPJWiXrMvoP9kUqqssu4iz6HbkWXtnwIC6v5TwYlfqhi0ucLBwERM0Xp0ioPcMG5t/1o5yguzLqbvyLEVyaSGENqqnF2xscal1Nc/i09kN2uVMmCHpJKZ7BSmHoI1oB/+Y0v+Srkpbj0bGnJNUi5BufzsXe8hOl8vBN/YhSYAYNQ5bSZsULTz9EmJa+f9Gb5PPOXu1Lbhhwt+LrU72aJeAz4pMM1/WcLaFIxBk7UybP9Kpf9Vsaj/XGew3gqemkBtxvfVZk6JwSWVU1kPcq/TkkGlS+Edn478jadTBwiFupUvv9ic0W55dA8GJGQ9wYnHWcxL46EwEGU3k1tVDSPeCWboKMNEyRoMfZ1rFKuVLl5DxBS++JmXePVS+XGlHmvIUhfPsmt1t4ngFTmWJ9DLtNxNsQKqPsly0yjEbhVu1Ksmc8jKO9V3W3onK8h7I8wG97+BcKr1P3484dUFtkHPKlDtprreQ1OPlqQ6DIoURmHtzP/qSLC2L6D2m4xXrzqbn2HKDUJ1Ondey4bJurDO+fHUSTFzIlDRd+c3LwDAMJNFE6Q71cKvs1ewlu1xco7y8zLYxyo=
     server: https://test.pypi.org/legacy/
     on:
       branch: master
   - provider: pypi
     user: ${PYPI_USER}
     password:
-      secure: ${PYPI_PASSWORD}
+      secure: qcOL9OSjb7dykdQpqBjAYU4kEyBRtCnZcRJ1QgCTVoYy8HB7f00fFZCdEsOvdHK3hxN/+JQoNFIxq8/havWmKiysWh1jGQO9ydrIPJWiXrMvoP9kUqqssu4iz6HbkWXtnwIC6v5TwYlfqhi0ucLBwERM0Xp0ioPcMG5t/1o5yguzLqbvyLEVyaSGENqqnF2xscal1Nc/i09kN2uVMmCHpJKZ7BSmHoI1oB/+Y0v+Srkpbj0bGnJNUi5BufzsXe8hOl8vBN/YhSYAYNQ5bSZsULTz9EmJa+f9Gb5PPOXu1Lbhhwt+LrU72aJeAz4pMM1/WcLaFIxBk7UybP9Kpf9Vsaj/XGew3gqemkBtxvfVZk6JwSWVU1kPcq/TkkGlS+Edn478jadTBwiFupUvv9ic0W55dA8GJGQ9wYnHWcxL46EwEGU3k1tVDSPeCWboKMNEyRoMfZ1rFKuVLl5DxBS++JmXePVS+XGlHmvIUhfPsmt1t4ngFTmWJ9DLtNxNsQKqPsly0yjEbhVu1Ksmc8jKO9V3W3onK8h7I8wG97+BcKr1P3484dUFtkHPKlDtprreQ1OPlqQ6DIoURmHtzP/qSLC2L6D2m4xXrzqbn2HKDUJ1Ondey4bJurDO+fHUSTFzIlDRd+c3LwDAMJNFE6Q71cKvs1ewlu1xco7y8zLYxyo=
     on:
       tags: true
