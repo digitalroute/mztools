@@ -17,13 +17,13 @@ deploy:
     user: ${PYPI_USER}
     password:
       secure: ${PYPI_PASSWORD}
-    server: https://pypi.pypi.org/legacy/
+    server: https://upload.pypi.org/legacy/
     on:
       branch: master
   - provider: pypi
     user: ${PYPI_USER}
     password:
       secure: ${PYPI_PASSWORD}
-    server: https://pypi.pypi.org/legacy/
+    server: https://upload.pypi.org/legacy/
     on:
       tags: true
