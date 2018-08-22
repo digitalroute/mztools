@@ -16,13 +16,13 @@ deploy:
     skip_existing: true
     user: ${PYPI_USER}
     password:
-      secure: "Ws2UUmyl41rBh2KSb06lWp6bcgD50PG06K+VOW0a74xSuRIDUQtIpf3s4xVNstM7hO4YT4gHJUt5YXlbfwS6+yLLhFhMfvvJk0UQGZ+rt/8BT6zvWHUDni0eX+0SRP5baQAqPDq3UuAZHHuheLSIU6Qe2JSGug4TZn5x3onffbzGwoAYuFeKyMmgu7q38IZQ5Pft2v1UT9x72aKpgiWJolGGLFHkBIxSvGkLRt+6QK9NKabotHf4DsQaSasnVglLNHxoaelxW4JDXKebi5B7USlTfCcpssNdBkpugJ9lfG52+TEFKcVY951dWc8pFqHtNWBiXmHbKXTqFY3TF7TLuLkQnGmU4ph5G17T6UXX1vTIaTmfmM0YlywBPNVqNhEL0qYqpe9WONM5Zn3Tji/yILj3p2Ap8oaaXvf9VjDAROait3Cp0v+bcxNWU/ILgB5HGULTA0TKOQ0dpZfK8wTb2mx2OsZ11wWTl6w2Y/udM2DmRuVVazKRXonGiIs26+TyKVYh1qBe/QyhyeYUVrS/PNhlC9Wpeh62azppsQucy+hTb1vWw4B+gBGfvDPssCdLqIOE79dzNlc3rjGgDGg7rWcHJ1QJmK15rWqKSnreavk8SbP5+uH79rkPojOdlbRXgtp2H0Mx+7k63TYhCe2UW5KSaJrYLcYoo8fcoi4x+5A="
+      secure: ${PYPI_PASSWORD}
     server: https://test.pypi.org/legacy/
     on:
       branch: master
   - provider: pypi
     user: ${PYPI_USER}
     password:
-      secure: "Ws2UUmyl41rBh2KSb06lWp6bcgD50PG06K+VOW0a74xSuRIDUQtIpf3s4xVNstM7hO4YT4gHJUt5YXlbfwS6+yLLhFhMfvvJk0UQGZ+rt/8BT6zvWHUDni0eX+0SRP5baQAqPDq3UuAZHHuheLSIU6Qe2JSGug4TZn5x3onffbzGwoAYuFeKyMmgu7q38IZQ5Pft2v1UT9x72aKpgiWJolGGLFHkBIxSvGkLRt+6QK9NKabotHf4DsQaSasnVglLNHxoaelxW4JDXKebi5B7USlTfCcpssNdBkpugJ9lfG52+TEFKcVY951dWc8pFqHtNWBiXmHbKXTqFY3TF7TLuLkQnGmU4ph5G17T6UXX1vTIaTmfmM0YlywBPNVqNhEL0qYqpe9WONM5Zn3Tji/yILj3p2Ap8oaaXvf9VjDAROait3Cp0v+bcxNWU/ILgB5HGULTA0TKOQ0dpZfK8wTb2mx2OsZ11wWTl6w2Y/udM2DmRuVVazKRXonGiIs26+TyKVYh1qBe/QyhyeYUVrS/PNhlC9Wpeh62azppsQucy+hTb1vWw4B+gBGfvDPssCdLqIOE79dzNlc3rjGgDGg7rWcHJ1QJmK15rWqKSnreavk8SbP5+uH79rkPojOdlbRXgtp2H0Mx+7k63TYhCe2UW5KSaJrYLcYoo8fcoi4x+5A="
+      secure: ${PYPI_PASSWORD}
     on:
       tags: true
