@@ -275,6 +275,12 @@ if len(sys.argv) == 2:
         restart_parser.print_help()
         sys.exit(1)
 
+# Check for too few args in subparsers
+if len(sys.argv) < 6:
+    if 'restart' in sys.argv:
+        restart_parser.print_help()
+        sys.exit(1)
+
 # Parse args and run appropriate function
 args = parser.parse_args()
 args.func(args)
