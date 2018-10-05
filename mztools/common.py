@@ -140,46 +140,47 @@ def run_lambda(function, payload={}):
 def get_log_stream(logGroup, prefix=None):
     client = boto3.client('logs')
 
-    # Get last log stream or prefixed log stream
-    if prefix:
-        successfulFetch = False
-        nextToken = ''
-        while not successfulFetch:
-            if nextToken != '':
-                response = client.describe_log_streams(
-                    logGroupName=logGroup,
-                    orderBy='LastEventTime',
-                    nextToken=nextToken,
-                    descending=True,
-                    limit=50
-                )
-            else:
-                response = client.describe_log_streams(
-                    logGroupName=logGroup,
-                    orderBy='LastEventTime',
-                    descending=True,
-                    limit=50
-                )
-
-            for log in response['logStreams']:
-                if log['logStreamName'].startswith(prefix):
-                    response['logStreams'][0] = log
-                    successfulFetch = True
-                    break
-                else:
-                    nextToken = response['nextToken']
-
-    else:
-        response = client.describe_log_streams(
-            logGroupName=logGroup,
-            orderBy='LastEventTime',
-            descending=True,
-            limit=1
-        )
-
     try:
+        # Get last log stream or prefixed log stream
+        if prefix:
+            successfulFetch = False
+            nextToken = ''
+            while not successfulFetch:
+                if nextToken != '':
+                    response = client.describe_log_streams(
+                        logGroupName=logGroup,
+                        orderBy='LastEventTime',
+                        nextToken=nextToken,
+                        descending=True,
+                        limit=50
+                    )
+                else:
+                    response = client.describe_log_streams(
+                        logGroupName=logGroup,
+                        orderBy='LastEventTime',
+                        descending=True,
+                        limit=50
+                    )
+
+                for log in response['logStreams']:
+                    if log['logStreamName'].startswith(prefix):
+                        response['logStreams'][0] = log
+                        successfulFetch = True
+                        break
+                    else:
+                        nextToken = response['nextToken']
+
+        else:
+            response = client.describe_log_streams(
+                logGroupName=logGroup,
+                orderBy='LastEventTime',
+                descending=True,
+                limit=1
+            )
+
         logStream = response['logStreams'][0]['logStreamName']
-    except IndexError:
+
+    except (IndexError, client.exceptions.ResourceNotFoundException):
         print(colored('  Log not found!\n', 'red'))
         return()
 

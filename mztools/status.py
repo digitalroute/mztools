@@ -47,33 +47,37 @@ def get_status(args):
 
     header = 'Instance Name'.ljust(columnWidth)
     header += 'Image'.ljust(columnWidth)
-    header += 'Status'
+    header += 'Status'.ljust(11)
     if verbose:
-        header += ' (UTC)'
+        header += '(UTC)'
     header += '\n'
 
     print(colored(header, attrs=['bold']))
 
     try:
         for pod in response['status']:
-            if pod['instance_name'].startswith(containers):
+            instance_name = pod.get('instance_name','Not available')
+            if instance_name.startswith(containers):
 
                 # Instance name
                 if verbose:
-                    line = pod['instance_name'].ljust(columnWidth)
+                    line = instance_name.ljust(columnWidth)
                 else:
-                    line = pod['instance_name'].split('-')[0]\
+                    line = instance_name.split('-')[0]\
                         .ljust(columnWidth)
 
                 # Image name and version
-                line += pod['image'].split('/')[-1].ljust(columnWidth)
+                image = pod.get('image','Not available')
+                line += image.split('/')[-1].ljust(columnWidth)
 
                 # Status and timestamp
+                status = pod.get('status','Unknown')
+                timestamp = pod.get('timeStamp','Not available')
                 line += colored(
-                    pod['status'].capitalize().ljust(11),
-                    status_color(pod['status']))
+                    status.capitalize().ljust(11),
+                    status_color(status))
                 if verbose:
-                    line += pod['timeStamp']
+                    line += timestamp
                 print(line)
 
     except KeyError as e:
