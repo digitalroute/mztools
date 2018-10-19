@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import boto3, sys
+import boto3
 from termcolor import colored
 from time import sleep
 from .common import run_lambda, SpinCursor, poll_build, get_log_stream
