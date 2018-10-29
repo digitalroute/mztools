@@ -33,7 +33,7 @@ def run_list(args):
 
     list_files(argsList)
 
-    return
+    return True
 
 
 def list_files(argsList):

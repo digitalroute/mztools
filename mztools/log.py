@@ -11,7 +11,7 @@ def run_log(args):
         print('Fetching log...\n')
         get_log(args)
 
-    return
+    return True
 
 
 def get_log(args):

@@ -29,4 +29,4 @@ def run_info(args):
     print('Test: ' + get_parameter('/test/ec/version'))
     print('Prod: ' + get_parameter('/prod/ec/version'))
 
-    return
+    return True
