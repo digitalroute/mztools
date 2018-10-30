@@ -16,4 +16,4 @@ def run_restart(args):
 
     print(res)
     print('\nUse the status command to get info about the state of the picos.\n')
-    return
+    return True

@@ -17,7 +17,7 @@ def run_deploy(args):
         if check_version(args.test[0], 'test'):
             print('You are trying to deploy the same version again.')
             print('Please pick another version to deploy.')
-            return
+            return False
 
         print('Triggering deploy...\n')
         deploy_container(ec, 'test', args.test[0])
@@ -25,7 +25,7 @@ def run_deploy(args):
         if check_version(get_parameter('/test/platform/version'), 'prod'):
             print('You are trying to deploy the same version again.')
             print('Deploy a another version to test for the ability to promote.')
-            return
+            return False
 
         question = '\nAre you sure you want to promote test to production? '
         question += '[yes/no]: '
@@ -42,7 +42,7 @@ def run_deploy(args):
         if check_version(args.dev[0], 'dev'):
             print('You are trying to deploy the same version again.')
             print('Please pick another version to deploy.')
-            return
+            return False
 
         if args.reset:
             reset = True
@@ -67,7 +67,7 @@ def run_deploy(args):
 
         deploy_container(ec, 'dev', args.dev[0], reset)
 
-    return
+    return True
 
 
 def check_version(version, env):

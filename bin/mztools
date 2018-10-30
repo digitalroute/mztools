@@ -283,6 +283,7 @@ if len(sys.argv) < 6:
 
 # Parse args and run appropriate function
 args = parser.parse_args()
-args.func(args)
+if args.func(args):
+    sys.exit(0)
 
-sys.exit(0)
+sys.exit(1)

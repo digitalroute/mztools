@@ -16,3 +16,11 @@ Configure AWS CLI with the credentials passed to you for your environment:
 Run command:  
 
     $ pip install mztools
+
+## Unittesting
+
+Install tox:
+    $ pip install tox
+
+Run tox:
+    $ tox
