@@ -345,7 +345,13 @@ def get_parameter(param):
             WithDecryption=False
         )['Parameter']['Value']
         return response
-    except botocore.exceptions.ClientError:
+    except botocore.exceptions.ClientError as e:
+        if 'ExpiredTokenException' in str(e):
+            print(colored('Your AWS Token has expired. Please renew it','red'))
+            sys.exit(1)
+        if 'AccessDeniedException' in str(e):
+            print(colored('Access to AWS parameterstore was denied. `aws configure`?','red'))
+            sys.exit(1)
         return '-'
 
 def run_delete_operation(filesDict, verified=False):

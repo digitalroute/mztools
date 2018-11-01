@@ -18,6 +18,7 @@ from mztools import version
 from mztools import lists
 from mztools import log
 from mztools import restart
+from mztools import vcexport
 
 # Main argument parser
 parser = argparse.ArgumentParser()
@@ -223,6 +224,20 @@ restart_parser.add_argument('-n', '--name',
                            metavar='name',
                            help='Get the name of pico to restart by using the status command with the verbose flag')
 
+vcexport_parser = subparsers.add_parser(
+    'vcexport',
+    help='Export to files')
+vcexport_parser.set_defaults(func=vcexport.run_vcexport)
+vcexport_parser.add_argument('-e', '--environment',
+                           choices=['dev', 'test', 'prod'],
+                           help='Export files from which environment')
+vcexport_parser.add_argument('-d', '--directory',
+                           metavar='folder',
+                           required=True,
+                           nargs='?',
+                           help='Directory to export to')
+vcexport_parser.add_argument('-u', '--user',
+                           help='MZ user (default mzadmin)')
 
 def help_header():
     banner = "                _              _     \n"
@@ -273,6 +288,9 @@ if len(sys.argv) == 2:
         sys.exit(1)
     if 'restart' in sys.argv:
         restart_parser.print_help()
+        sys.exit(1)
+    if 'vcexport' in sys.argv:
+        vcexport_parser.print_help()
         sys.exit(1)
 
 # Check for too few args in subparsers
