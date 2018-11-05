@@ -23,7 +23,6 @@ def run_vcexport(args):
 
     print(colored('Running vcexport in K8s cluster '+kops_cluster_name, 'white'))
     kube = K8sexec(kops_state_bucket=kops_state_bucket, kops_cluster_name=kops_cluster_name)
-    api = kube.get_api()
     mzuser = 'mzadmin'
     if args.user:
         mzuser = args.user

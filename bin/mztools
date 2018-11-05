@@ -19,6 +19,7 @@ from mztools import lists
 from mztools import log
 from mztools import restart
 from mztools import vcexport
+from mztools import vcimport
 
 # Main argument parser
 parser = argparse.ArgumentParser()
@@ -239,6 +240,21 @@ vcexport_parser.add_argument('-d', '--directory',
 vcexport_parser.add_argument('-u', '--user',
                            help='MZ user (default mzadmin)')
 
+vcimport_parser = subparsers.add_parser(
+    'vcimport',
+    help='Import from files')
+vcimport_parser.set_defaults(func=vcimport.run_vcimport)
+vcimport_parser.add_argument('-e', '--environment',
+                           choices=['dev', 'test', 'prod'],
+                           help='Import files to which environment')
+vcimport_parser.add_argument('-d', '--directory',
+                           metavar='folder',
+                           required=True,
+                           nargs='?',
+                           help='Directory to import from')
+vcimport_parser.add_argument('-u', '--user',
+                           help='MZ user (default mzadmin)')
+
 def help_header():
     banner = "                _              _     \n"
     banner += "  _ __ ___  ___| |_ ___   ___ | |___ \n"
@@ -291,6 +307,9 @@ if len(sys.argv) == 2:
         sys.exit(1)
     if 'vcexport' in sys.argv:
         vcexport_parser.print_help()
+        sys.exit(1)
+    if 'vcimport' in sys.argv:
+        vcimport_parser.print_help()
         sys.exit(1)
 
 # Check for too few args in subparsers

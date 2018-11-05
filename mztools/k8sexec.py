@@ -5,9 +5,9 @@ from kubernetes import config
 from kubernetes.client import Configuration
 from kubernetes.client.apis import core_v1_api
 from kubernetes.stream import stream
-import os, sys, tempfile
+import os, sys, tempfile, time
 from subprocess import run, DEVNULL, Popen, PIPE
-from base64 import standard_b64decode
+from base64 import standard_b64decode, standard_b64encode
 
 from .kops import export_kubecfg, get_state_bucket
 
@@ -122,3 +122,36 @@ class K8sexec:
                 result['stderr'].append(resp.read_stderr())
         resp.close()
         return standard_b64decode("-".join(result['stdout']))
+
+    def untar_pod_directory(self, tarbytes, pod_name, dest_dir):
+        exec_command = ['/bin/sh']
+        resp = stream(self.api.connect_get_namespaced_pod_exec, pod_name, 'default',
+                      command=exec_command,
+                      stderr=True, stdin=True,
+                      stdout=True, tty=False,
+                      _preload_content=False)
+
+        receive_bytes_command = 'base64 -d - << ALLdone | tar -C '+dest_dir+" -xf -\n"
+        resp.write_stdin(receive_bytes_command)
+        resp.write_stdin(standard_b64encode(tarbytes).decode('ascii'))
+        resp.write_stdin("\nALLdone\necho ALL done\n")
+        result = { "stderr": [], "stdout": [], "success": False}
+        start_time = time.time()
+        while resp.is_open():
+            resp.update(timeout=1)
+            if resp.peek_stderr():
+                result['stderr'].append(resp.read_stderr(timeout=3))
+            if resp.peek_stdout():
+                buf=resp.read_stdout(timeout=3)
+                if buf is not None:
+                    if 'ALL done' in buf:
+                        result['stdout'].append(buf[:-9])
+                        break
+                    result['stdout'].append(buf)
+            else:
+                # timeout, seconds
+                if time.time() > start_time + 60:
+                    result['success'] = False
+                    break
+        resp.close()
+        return result

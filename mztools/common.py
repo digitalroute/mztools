@@ -384,3 +384,11 @@ def untar_bytes(bytes, destdir):
     if tarpipe.wait() != 0:
         return False
     return True
+
+def tar_directory(srcdir):
+    tarpipe = Popen(["tar", "-C", srcdir, "-cf", "-", "."], stdout=PIPE)
+    bytes = tarpipe.stdout.read()
+    tarpipe.stdout.close()
+    if tarpipe.wait() != 0:
+        return None
+    return bytes
