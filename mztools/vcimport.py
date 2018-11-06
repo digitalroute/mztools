@@ -52,19 +52,29 @@ def run_vcimport(args):
         return False
 
     if args.user:
-        mzuser = args.user
-    mzpasswd = getpass.getpass("Password for " + mzuser + ":")
-
+        if '/' in args.user:
+            mzpasswd = args.user.split('/',2)[1]
+            mzuser = args.user.split('/',2)[0]
+        else:
+            mzuser = args.user
+            mzpasswd = getpass.getpass("Password for " + mzuser + ":")
+    mzsh_extraargs = ""
+    if args.message:
+        mzsh_extraargs+= ' -m "'+args.message.replace('"','”')+'"'
+    if args.dryrun:
+        mzsh_extraargs+= " -y"
+    if args.folders:
+        mzsh_extraargs+= " -f " + ' '.join(args.folders)
     commands = [
-        # Fixme remove echo after verifying that this command is safe
-        'echo mzsh '+mzuser+'/'+mzpasswd+' vcimport -d $tmpdir'
+        'mzsh '+mzuser+'/'+mzpasswd+' vcimport -d '+ import_dir + mzsh_extraargs
     ]
     exec_result = kube.exec_pod_command(command=commands, pod_name = platform_pod_name)
     if not exec_result['success']:
         return False
     kube.delete_pod_directory(platform_pod_name, import_dir)
-
-    print(colored('Files have been imported from directory "' + import_dir + "'", 'green'))
+    for s in exec_result["stdout"]:
+        if len(s) > 0:
+            print(colored(s.rstrip(), 'blue'))
     return True
 
 def checkdir(destdir):

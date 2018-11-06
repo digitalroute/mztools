@@ -8,10 +8,13 @@ from kubernetes.stream import stream
 import os, sys, tempfile, time
 from subprocess import run, DEVNULL, Popen, PIPE
 from base64 import standard_b64decode, standard_b64encode
+import string, random
 
 from .kops import export_kubecfg, get_state_bucket
 
 class K8sexec:
+    cmd_endmarker_len = 12
+
     def __init__(self, config_file_name):
         self.load_config(config_file_name)
 
@@ -52,6 +55,7 @@ class K8sexec:
         return None
 
     def exec_pod_command(self, command, labels = None, pod_name = None):
+        cmd_complete_marker = self.generate_cmd_marker()
         result = { "stderr": [], "stdout": [], "success": False, "pod_name": None}
         if labels != None:
             pod_name = self.find_pod_by_labels(labels)
@@ -78,15 +82,15 @@ class K8sexec:
             else:
                 break
 
-        resp.write_stdin("echo ALL done\n")
+        resp.write_stdin("echo "+cmd_complete_marker+"\n")
 
         while resp.is_open():
             resp.update(timeout=1)
             if resp.peek_stdout():
                 buf=resp.read_stdout(timeout=3)
                 if buf is not None:
-                    if 'ALL done' in buf:
-                        result['stdout'].append(buf[:-9])
+                    if cmd_complete_marker in buf:
+                        result['stdout'].append(buf[:-self.cmd_endmarker_len])
                         break
                     result['stdout'].append(buf)
             if resp.peek_stderr():
@@ -98,6 +102,7 @@ class K8sexec:
         self.exec_pod_command(command=["rm -r " + dir], pod_name=pod_name)
 
     def tar_pod_directory(self, pod_name, dir):
+        cmd_complete_marker = self.generate_cmd_marker()
         exec_command = ['/bin/sh']
         resp = stream(self.api.connect_get_namespaced_pod_exec, pod_name, 'default',
                       command=exec_command,
@@ -106,7 +111,7 @@ class K8sexec:
                       _preload_content=False)
 
         resp.write_stdin("tar -C "+dir+" -cf - . | base64\n")
-        resp.write_stdin("echo ALL done\n")
+        resp.write_stdin("echo "+cmd_complete_marker+"\n")
 
         result = { "stderr": [], "stdout": [], "success": False}
         while resp.is_open():
@@ -114,8 +119,8 @@ class K8sexec:
             if resp.peek_stdout():
                 buf=resp.read_stdout(timeout=3)
                 if buf is not None:
-                    if 'ALL done' in buf:
-                        result['stdout'].append(buf[:-9])
+                    if cmd_complete_marker in buf:
+                        result['stdout'].append(buf[:-self.cmd_endmarker_len])
                         break
                     result['stdout'].append(buf)
             if resp.peek_stderr():
@@ -124,6 +129,8 @@ class K8sexec:
         return standard_b64decode("-".join(result['stdout']))
 
     def untar_pod_directory(self, tarbytes, pod_name, dest_dir):
+        cmd_complete_marker = self.generate_cmd_marker()
+        heredoc_end_marker = self.generate_cmd_marker()
         exec_command = ['/bin/sh']
         resp = stream(self.api.connect_get_namespaced_pod_exec, pod_name, 'default',
                       command=exec_command,
@@ -131,10 +138,10 @@ class K8sexec:
                       stdout=True, tty=False,
                       _preload_content=False)
 
-        receive_bytes_command = 'base64 -d - << ALLdone | tar -C '+dest_dir+" -xf -\n"
+        receive_bytes_command = 'base64 -d - << '+heredoc_end_marker+' | tar -C '+dest_dir+" -xf -\n"
         resp.write_stdin(receive_bytes_command)
         resp.write_stdin(standard_b64encode(tarbytes).decode('ascii'))
-        resp.write_stdin("\nALLdone\necho ALL done\n")
+        resp.write_stdin("\n"+heredoc_end_marker+"\necho "+cmd_complete_marker+"\n")
         result = { "stderr": [], "stdout": [], "success": False}
         start_time = time.time()
         while resp.is_open():
@@ -144,8 +151,8 @@ class K8sexec:
             if resp.peek_stdout():
                 buf=resp.read_stdout(timeout=3)
                 if buf is not None:
-                    if 'ALL done' in buf:
-                        result['stdout'].append(buf[:-9])
+                    if cmd_complete_marker in buf:
+                        result['stdout'].append(buf[:-self.cmd_endmarker_len])
                         break
                     result['stdout'].append(buf)
             else:
@@ -155,3 +162,6 @@ class K8sexec:
                     break
         resp.close()
         return result
+
+    def generate_cmd_marker(self):
+        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=self.cmd_endmarker_len-1))
