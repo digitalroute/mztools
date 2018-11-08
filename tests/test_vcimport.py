@@ -7,7 +7,7 @@ from _pytest.monkeypatch import MonkeyPatch
 
 from argparse import Namespace
 
-class TestVcexport(unittest.TestCase):
+class TestVcimport(unittest.TestCase):
     def setUp(self):
      self.monkeypatch = MonkeyPatch()
      self.monkeypatch.setattr('mztools.vcimport.find_single_cluster', lambda a,b: "singlecluster")
