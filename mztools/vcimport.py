@@ -12,7 +12,6 @@ from kubernetes.stream import stream
 
 def run_vcimport(args):
     env = args.environment
-    mzuser = 'mzadmin'
     srcdir = args.directory
     if not checkdir(srcdir):
         return False
@@ -51,13 +50,16 @@ def run_vcimport(args):
         print(exec_result['stderr'])
         return False
 
+    mzuser = 'mzadmin'
+    mzpasswd = None
     if args.user:
         if '/' in args.user:
             mzpasswd = args.user.split('/',2)[1]
             mzuser = args.user.split('/',2)[0]
         else:
             mzuser = args.user
-            mzpasswd = getpass.getpass("Password for " + mzuser + ":")
+    if mzpasswd is None:
+        mzpasswd = getpass.getpass("Password for " + mzuser + ":")
     mzsh_extraargs = ""
     if args.message:
         mzsh_extraargs+= ' -m "'+args.message.replace('"','”')+'"'

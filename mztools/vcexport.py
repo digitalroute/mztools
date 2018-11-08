@@ -32,7 +32,8 @@ def run_vcexport(args):
             mzuser = args.user.split('/',2)[0]
         else:
             mzuser = args.user
-            mzpasswd = getpass.getpass("Password for " + mzuser + ":")
+    if mzpasswd is None:
+        mzpasswd = getpass.getpass("Password for " + mzuser + ":")
     mzsh_extraargs = ""
     if args.excludesysdata:
         mzsh_extraargs+= " -es"
