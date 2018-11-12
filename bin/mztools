@@ -18,6 +18,8 @@ from mztools import version
 from mztools import lists
 from mztools import log
 from mztools import restart
+from mztools import vcexport
+from mztools import vcimport
 
 # Main argument parser
 parser = argparse.ArgumentParser()
@@ -223,6 +225,57 @@ restart_parser.add_argument('-n', '--name',
                            metavar='name',
                            help='Get the name of pico to restart by using the status command with the verbose flag')
 
+vcexport_parser = subparsers.add_parser(
+    'vcexport',
+    help='Export to files')
+vcexport_parser.set_defaults(func=vcexport.run_vcexport)
+vcexport_parser.add_argument('-e', '--environment',
+                           choices=['dev', 'test', 'prod'],
+                           help='Export files from which environment')
+vcexport_parser.add_argument('-d', '--directory',
+                           metavar='folder',
+                           required=True,
+                           nargs='?',
+                           help='Directory to export to')
+vcexport_parser.add_argument('-u', '--user',
+                           help='MZ user (default mzadmin)')
+vcexport_parser.add_argument('-es', '--excludesysdata',
+                            action='store_true',
+                            help='Exclude system data from export')
+vcexport_parser.add_argument('-f', '--folders',
+                           metavar='folder',
+                           nargs='+',
+                           help='Folders to include, default all')
+vcexport_parser.add_argument('-im', '--includemeta',
+                           action='store_true',
+                           help='Include meta data')
+vcexport_parser.add_argument('-o', '--overwrite',
+                           action='store_true',
+                           help='Overwrite an existing export')
+vcimport_parser = subparsers.add_parser(
+    'vcimport',
+    help='Import from files')
+vcimport_parser.set_defaults(func=vcimport.run_vcimport)
+vcimport_parser.add_argument('-e', '--environment',
+                           choices=['dev', 'test', 'prod'],
+                           help='Import files to which environment')
+vcimport_parser.add_argument('-d', '--directory',
+                           metavar='folder',
+                           required=True,
+                           nargs='?',
+                           help='Directory to import from')
+vcimport_parser.add_argument('-f', '--folders',
+                          metavar='folder',
+                          nargs='+',
+                          help='Folders to import, default all in import directory.')
+vcimport_parser.add_argument('-m', '--message',
+                           nargs='?',
+                           help='Add a message to identify the import')
+vcimport_parser.add_argument('-u', '--user',
+                           help='MZ user (default mzadmin)')
+vcimport_parser.add_argument('-y', '--dryrun',
+                          action='store_true',
+                          help='Parse files without actually importing')
 
 def help_header():
     banner = "                _              _     \n"
@@ -273,6 +326,12 @@ if len(sys.argv) == 2:
         sys.exit(1)
     if 'restart' in sys.argv:
         restart_parser.print_help()
+        sys.exit(1)
+    if 'vcexport' in sys.argv:
+        vcexport_parser.print_help()
+        sys.exit(1)
+    if 'vcimport' in sys.argv:
+        vcimport_parser.print_help()
         sys.exit(1)
 
 # Check for too few args in subparsers

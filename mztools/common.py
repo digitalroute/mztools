@@ -12,6 +12,8 @@ import tempfile
 import boto3
 import botocore
 
+from subprocess import DEVNULL, Popen, PIPE
+
 from datetime import datetime
 from termcolor import colored
 from .ver import __version__
@@ -345,7 +347,13 @@ def get_parameter(param):
             WithDecryption=False
         )['Parameter']['Value']
         return response
-    except botocore.exceptions.ClientError:
+    except botocore.exceptions.ClientError as e:
+        if 'ExpiredTokenException' in str(e):
+            print(colored('Your AWS Token has expired. Please renew it','red'))
+            sys.exit(1)
+        if 'AccessDeniedException' in str(e):
+            print(colored('Access to AWS parameterstore was denied. `aws configure`?','red'))
+            sys.exit(1)
         return '-'
 
 def run_delete_operation(filesDict, verified=False):
@@ -364,3 +372,23 @@ def run_delete_operation(filesDict, verified=False):
         filesOperated[fileType] = response
 
     return(filesOperated)
+
+def list_s3_bucket_dirs(bucketname):
+    bucket=boto3.resource('s3').Bucket(bucketname)
+    return list(set(map(lambda o: o.key.rsplit('/')[0], bucket.objects.all())))
+
+def untar_bytes(bytes, destdir):
+    tarpipe = Popen(["tar", "-C", destdir, "-xf", "-"], stdin=PIPE)
+    tarpipe.stdin.write(bytes)
+    tarpipe.stdin.close()
+    if tarpipe.wait() != 0:
+        return False
+    return True
+
+def tar_directory(srcdir):
+    tarpipe = Popen(["tar", "-C", srcdir, "-cf", "-", "."], stdout=PIPE)
+    bytes = tarpipe.stdout.read()
+    tarpipe.stdout.close()
+    if tarpipe.wait() != 0:
+        return None
+    return bytes

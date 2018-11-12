@@ -19,5 +19,6 @@ setup(name='mztools',
       install_requires=[
         "boto3",
         "termcolor",
+        "kubernetes==5.0",
       ],
       )
