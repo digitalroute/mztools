@@ -39,6 +39,8 @@ def get_status(args):
     else:
         columnWidth = 24
 
+    columnWidthImage = 32
+
     result = []
 
     response = run_lambda('paas-tools-lambda_get-status', {
@@ -46,7 +48,7 @@ def get_status(args):
     })
 
     header = 'Instance Name'.ljust(columnWidth)
-    header += 'Image'.ljust(columnWidth)
+    header += 'Image'.ljust(columnWidthImage)
     header += 'Status'.ljust(11)
     if verbose:
         header += '(UTC)'
@@ -68,7 +70,7 @@ def get_status(args):
 
                 # Image name and version
                 image = pod.get('image','Not available')
-                line += image.split('/')[-1].ljust(columnWidth)
+                line += image.split('/')[-1].ljust(columnWidthImage)
 
                 # Status and timestamp
                 status = pod.get('status','Unknown')
