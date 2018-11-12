@@ -2,13 +2,9 @@ from termcolor import colored
 import os
 import time
 import getpass
+from base64 import standard_b64encode
 
-from .common import get_parameter, list_s3_bucket_dirs, tar_directory
-from .k8sexec import K8sexec
-from .kops import find_single_cluster, get_state_bucket
-
-from kubernetes.client.rest import ApiException
-from kubernetes.stream import stream
+from .common import tar_directory, run_lambda
 
 def run_vcimport(args):
     env = args.environment
@@ -19,36 +15,6 @@ def run_vcimport(args):
     tarbytes = tar_directory(srcdir)
     if tarbytes is None:
         print(colored("There were some errors packing files locally", 'red'))
-
-    kops_state_bucket = get_state_bucket(env)
-    kops_cluster_name = find_single_cluster(kops_state_bucket, env)
-    if kops_cluster_name is None:
-        return False
-
-    print(colored('Running vcimport in K8s cluster '+kops_cluster_name, 'white'))
-    kube = K8sexec(kops_state_bucket=kops_state_bucket, kops_cluster_name=kops_cluster_name)
-
-    commands = [
-        'tmpdir=`mktemp -d`',
-        'echo $tmpdir is the IMPORT_DIR>&2',
-    ]
-    exec_result = kube.exec_pod_command(command=commands, labels={ "app": "platform" })
-    if not exec_result['success']:
-        return False
-    import_dir = None
-    for row in exec_result['stderr']:
-        if "the IMPORT_DIR" in row:
-            import_dir = row.rsplit(' ')[0]
-    if import_dir is None:
-        print(colored("The command failed in Pod", 'red'))
-        return False
-
-    platform_pod_name = exec_result['pod_name']
-    kube.untar_pod_directory(tarbytes, pod_name=platform_pod_name, dest_dir=import_dir)
-    if not exec_result['success']:
-        print(colored('tar failed in pod:', 'red'))
-        print(exec_result['stderr'])
-        return False
 
     mzuser = 'mzadmin'
     mzpasswd = None
@@ -67,26 +33,28 @@ def run_vcimport(args):
         mzsh_extraargs+= " -y"
     if args.folders:
         mzsh_extraargs+= " -f " + ' '.join(args.folders)
-    commands = [
-        'mzsh '+mzuser+'/'+mzpasswd+' vcimport -d '+ import_dir + mzsh_extraargs
-    ]
-    exec_result = kube.exec_pod_command(command=commands, pod_name = platform_pod_name)
-    if not exec_result['success']:
+
+    response = run_lambda('paas-tools-lambda_mzsh-vcimport', {
+        'tarfile': standard_b64encode(tarbytes).decode('ascii'),
+        'env': env,
+        'mzuserpasswd': mzuser+'/'+mzpasswd,
+        'mzsh_extraargs': mzsh_extraargs
+    })
+    if not 'mzsh_stdout' in response or len(response['mzsh_stdout']) < 3:
+        print(colored("Import failed to execute mzsh", 'red'))
+        print(response)
         return False
-    kube.delete_pod_directory(platform_pod_name, import_dir)
-    for s in exec_result["stdout"]:
-        if len(s) > 0:
-            print(colored(s.rstrip(), 'blue'))
+    print(colored(response['mzsh_stdout'].rstrip(), 'blue'))
     return True
 
-def checkdir(destdir):
-    if not os.path.isdir(destdir):
-        if os.path.exists(destdir):
-            print (colored('Destination directory `'+destdir+'` is not a directory',
+def checkdir(srcdir):
+    if not os.path.isdir(srcdir):
+        if os.path.exists(srcdir):
+            print (colored('Source directory `'+srcdir+'` is not a directory',
                 'red', attrs=['bold']))
             return False
         else:
-            print (colored('Destination directory `'+destdir+'` does not exist',
+            print (colored('Source directory `'+srcdir+'` does not exist',
                 'red', attrs=['bold']))
             return False
     return True

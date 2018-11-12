@@ -1,14 +1,10 @@
 from termcolor import colored
-import os
+import os, sys
 import time
 import getpass
+from base64 import standard_b64decode
 
-from .common import get_parameter, list_s3_bucket_dirs, untar_bytes
-from .k8sexec import K8sexec
-from .kops import find_single_cluster, get_state_bucket
-
-from kubernetes.client.rest import ApiException
-from kubernetes.stream import stream
+from .common import untar_bytes, run_lambda
 
 def run_vcexport(args):
     env = args.environment
@@ -17,13 +13,6 @@ def run_vcexport(args):
     if not checkdir(destdir, overwrite):
         return False
 
-    kops_state_bucket = get_state_bucket(env)
-    kops_cluster_name = find_single_cluster(kops_state_bucket, env)
-    if kops_cluster_name is None:
-        return False
-
-    print(colored('Running vcexport in K8s cluster '+kops_cluster_name, 'white'))
-    kube = K8sexec(kops_state_bucket=kops_state_bucket, kops_cluster_name=kops_cluster_name)
     mzuser = 'mzadmin'
     mzpasswd = None
     if args.user:
@@ -41,27 +30,21 @@ def run_vcexport(args):
         mzsh_extraargs+= " -im"
     if args.folders:
         mzsh_extraargs+= " -f " + ' '.join(args.folders)
-    commands = [
-        'tmpdir=`mktemp -d`',
-        'echo $tmpdir is the EXPORT_DIR>&2',
-        'mzsh '+mzuser+'/'+mzpasswd+' vcexport -d $tmpdir' + mzsh_extraargs,
-    ]
 
-    exec_result = kube.exec_pod_command(command=commands, labels={ "app": "platform" })
-    if not exec_result['success']:
+    response = run_lambda('paas-tools-lambda_mzsh-vcexport', {
+        'env': env,
+        'mzuserpasswd': mzuser+'/'+mzpasswd,
+        'mzsh_extraargs': mzsh_extraargs
+    })
+
+    if 'tarfile' not in response or response['tarfile'] is None:
+        print(colored('The remote function failed:','red'))
+        print(response)
         return False
-    export_dir = None
-    for row in exec_result['stderr']:
-        if "the EXPORT_DIR" in row:
-            export_dir = row.rsplit(' ')[0]
-    if export_dir is None:
-        print(colored("The command failed in Pod", 'red'))
-        return False
-    platform_pod_name = exec_result['pod_name']
-    tarbytes = kube.tar_pod_directory(platform_pod_name, export_dir)
-    kube.delete_pod_directory(platform_pod_name, export_dir)
-    if not untar_bytes(tarbytes, destdir):
+    tarbytes = response['tarfile']
+    if not untar_bytes(standard_b64decode(tarbytes), destdir):
         print(colored("There were some errors unpacking files locally", 'red'))
+        return False
     print(colored('Files have been written to directory "' + destdir + "'", 'green'))
     return True
 
@@ -78,7 +61,7 @@ def checkdir(destdir, overwrite):
     if not overwrite:
         for filename in os.listdir(destdir):
             if filename[0] != '.':
-                print (colored('Destination directory `'+destdir+'` is not empty and overwrite was not specified',
+                print (colored('Destination directory `'+destdir+'` is not empty and overwrite (dangerous!) was not specified',
                     'red', attrs=['bold']))
                 return False
     return True

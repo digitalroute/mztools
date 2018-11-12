@@ -2,6 +2,8 @@ import unittest
 import sys
 sys.path.append('..')
 from mztools import vcimport
+from base64 import standard_b64decode
+
 from unittest.mock import patch, Mock
 from _pytest.monkeypatch import MonkeyPatch
 
@@ -10,16 +12,13 @@ from argparse import Namespace
 class TestVcimport(unittest.TestCase):
     def setUp(self):
      self.monkeypatch = MonkeyPatch()
-     self.monkeypatch.setattr('mztools.vcimport.find_single_cluster', lambda a,b: "singlecluster")
-     kube_mock = Mock()
-     kube_mock.exec_pod_command.return_value = {
-         "success": True,
-         "stdout": [],
-         "stderr": [ "/tmp/baz is the IMPORT_DIR" ],
-         "pod_name": "mockpod",
+     self.lambdaMock = Mock()
+     self.lambdaMock.run_lambda.return_value = {
+        "mzsh_stdout": "OK\n"
      }
-     self.monkeypatch.setattr('mztools.vcimport.K8sexec', lambda kops_state_bucket, kops_cluster_name: kube_mock)
-     self.monkeypatch.setattr('mztools.vcimport.tar_directory', lambda a: True)
+
+     self.monkeypatch.setattr('mztools.vcimport.run_lambda', lambda a,b: self.lambdaMock.run_lambda())
+     self.monkeypatch.setattr('mztools.vcimport.tar_directory', lambda a: standard_b64decode("UGF4SGVhZGVyL2VtcHR5AAAAAAA="))
 
     @patch('mztools.common.boto3')
     @patch('getpass.getpass')
