@@ -6,6 +6,33 @@ from time import sleep
 from termcolor import colored
 from .common import run_lambda, SpinCursor, poll_build, get_parameter
 
+def get_pod_name(env, container):
+
+    pod_name = ''
+    response = run_lambda('paas-tools-lambda_get-status', {
+        'environment': env
+    })
+
+    try:
+        for pod in response['status']:
+            instance_name = pod.get('instance_name','Not available')
+
+            if instance_name.startswith(container+'-'):
+                pod_name = instance_name
+
+    except KeyError as e:
+        print('  Unable to get ' + container + ' status.')
+
+    return pod_name
+
+def restart_pod(env, name):
+
+    res = run_lambda('paas-tools-lambda_restart-pico', {
+        'environment': env,
+        'name': name
+    })
+    print('  Restarting wd instance' + res + '\n')
+    return
 
 def run_deploy(args):
     if args.no_ec:
@@ -115,6 +142,12 @@ def deploy_container(ec, environment=None, version=None, reset=False):
             print(colored('Unknown', 'yellow', attrs=['bold']))
 
     print('')
+
+    pod_name = get_pod_name(environment, 'wd')
+    if pod_name:
+        restart_pod(environment, pod_name)
+    else:
+        print('  Please restart web desktop in the ' + environment + ' environment.\n')
 
     if environment == 'test':
         print(colored('  To promote test to prod run "mztools deploy -p"\n',
