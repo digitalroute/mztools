@@ -125,9 +125,9 @@ def run_lambda(function, payload={}):
             LogType='Tail',
             Payload=json.dumps(payload)
         )
-    except botocore.exceptions.PartialCredentialsError as e:
-        print('Not allowed to trigger backend, have you assumed the correct role?')
-        print('AWS Error: ', e)
+    except (botocore.exceptions.PartialCredentialsError, botocore.exceptions.ClientError) as e:
+        print(colored('Not allowed to trigger backend, have you assumed the correct role?', 'red', attrs=['bold']))
+        print(colored('AWS Error:', 'red'), colored(e,'red'))
         sys.exit(1)
 
     # Load the response, decoded with json
