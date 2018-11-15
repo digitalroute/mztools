@@ -61,7 +61,6 @@ class TestVcexport(unittest.TestCase):
         listdir.return_value = []
         getpass.return_value = "thepass"
         glob.return_value = [ "Examples" ]
-#        self.monkeypatch.setattr('mztools.vcexport.checkexportok', lambda a,b: True)
 
         result = vcexport.run_vcexport(args)
 
