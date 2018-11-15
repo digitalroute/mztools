@@ -25,7 +25,7 @@ class TestVcimport(unittest.TestCase):
     @patch('os.listdir')
     def test_asks_for_password_if_not_in_arguments(self, listdir, getpass, boto3):
         args = Namespace(**{
-            "environment": "test",
+            "environment": ["test"],
             "directory": ".",
             "overwrite": False,
             "excludesysdata": False,
@@ -49,7 +49,7 @@ class TestVcimport(unittest.TestCase):
     @patch('os.listdir')
     def test_does_not_ask_for_passwd_if_given(self, listdir, getpass, boto3):
         args = Namespace(**{
-            "environment": "test",
+            "environment": ["test"],
             "directory": ".",
             "overwrite": False,
             "user": "user/passwd",
@@ -64,3 +64,25 @@ class TestVcimport(unittest.TestCase):
 
         self.assertEqual(getpass.called, False)
         self.assertEqual(result,True)
+
+    @patch('getpass.getpass')
+    @patch('os.listdir')
+    @patch('sys.exit')
+    def test_aborts_when_env_ambiguous(self, mock_exit, listdir, getpass):
+        args = Namespace(**{
+            "environment": ["test", "dev"],
+            "directory": ".",
+            "overwrite": False,
+            "user": "user/passwd",
+            "folders": [ "Examples" ],
+            "message": None,
+            "dryrun": False
+        })
+        listdir.return_value = []
+        getpass.return_value = "thepass"
+
+        result = vcimport.run_vcimport(args)
+
+        mock_exit.assert_has_calls([
+            unittest.mock.call(1)
+        ])

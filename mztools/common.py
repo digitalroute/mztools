@@ -392,3 +392,9 @@ def tar_directory(srcdir):
     if tarpipe.wait() != 0:
         return None
     return bytes
+
+def allow_one(thelist):
+    if len(thelist) != 1:
+        print(colored('Only one is allowed - ' + '|'.join(thelist), 'red'))
+        sys.exit(1)
+    return thelist[0]

@@ -26,7 +26,7 @@ class TestVcexport(unittest.TestCase):
     @patch('glob.glob')
     def test_warning_when_not_all_folders_exported(self, glob, listdir, mock_stderr):
             args = Namespace(**{
-                "environment": "test",
+                "environment": ["test"],
                 "directory": "mocktmpdir",
                 "overwrite": False,
                 "excludesysdata": False,
@@ -50,7 +50,7 @@ class TestVcexport(unittest.TestCase):
     @patch('glob.glob')
     def test_asks_for_password_if_not_in_arguments(self, glob, listdir, getpass):
         args = Namespace(**{
-            "environment": "test",
+            "environment": ["test"],
             "directory": ".",
             "overwrite": False,
             "excludesysdata": False,
@@ -73,7 +73,7 @@ class TestVcexport(unittest.TestCase):
     @patch('glob.glob')
     def test_does_not_ask_for_passwd_if_given(self, glob, listdir, getpass):
         args = Namespace(**{
-            "environment": "test",
+            "environment": ["test"],
             "directory": ".",
             "overwrite": False,
             "excludesysdata": False,
@@ -95,7 +95,7 @@ class TestVcexport(unittest.TestCase):
     @patch('os.listdir')
     def test_aborts_when_exportdir_not_empty(self, listdir):
         args = Namespace(**{
-            "environment": "test",
+            "environment": ["test"],
             "directory": ".",
             "overwrite": False,
             "excludesysdata": False,
@@ -115,7 +115,7 @@ class TestVcexport(unittest.TestCase):
     @patch('os.mkdir')
     def test_create_exportdir_ifnotexist(self, mkdir, isdir):
             args = Namespace(**{
-                "environment": "test",
+                "environment": ["test"],
                 "directory": "doesnotexist",
                 "overwrite": False,
                 "excludesysdata": False,

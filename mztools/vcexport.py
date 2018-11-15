@@ -4,10 +4,10 @@ import time
 import getpass
 from base64 import standard_b64decode
 
-from .common import untar_bytes, run_lambda
+from .common import untar_bytes, run_lambda, allow_one
 
 def run_vcexport(args):
-    env = args.environment
+    env = allow_one(args.environment)
     destdir = args.directory
     overwrite = args.overwrite
     if not checkdir(destdir, overwrite):

@@ -231,6 +231,7 @@ vcexport_parser = subparsers.add_parser(
 vcexport_parser.set_defaults(func=vcexport.run_vcexport)
 vcexport_parser.add_argument('-e', '--environment',
                             required=True,
+                            action='append',
                             choices=['dev', 'test', 'prod'],
                             help='Export files from which environment')
 vcexport_parser.add_argument('-es', '--excludesysdata',
@@ -260,6 +261,7 @@ vcimport_parser = subparsers.add_parser(
 vcimport_parser.set_defaults(func=vcimport.run_vcimport)
 vcimport_parser.add_argument('-e', '--environment',
                             required=True,
+                            action='append',
                             choices=['dev', 'test', 'prod'],
                             help='Import files to which environment')
 vcimport_parser.add_argument('-d', '--directory',
