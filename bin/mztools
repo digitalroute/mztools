@@ -319,8 +319,10 @@ if len(sys.argv) == 2:
         version.run_version()
         sys.exit(0)
     if 'list' in sys.argv:
-        lists.run_list(None)
-        sys.exit(0)
+        if lists.run_list(None):
+            sys.exit(0)
+        else:
+            sys.exit(1)
     if 'log' in sys.argv:
         log_parser.print_help()
         sys.exit(1)
