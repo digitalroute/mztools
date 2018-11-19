@@ -227,7 +227,7 @@ restart_parser.add_argument('-n', '--name',
 
 vcexport_parser = subparsers.add_parser(
     'vcexport',
-    help='Export to files')
+    help='Export configuration to files in Version Control format')
 vcexport_parser.set_defaults(func=vcexport.run_vcexport)
 vcexport_parser.add_argument('-e', '--environment',
                             required=True,
@@ -257,7 +257,7 @@ vcexport_parser.add_argument('-u', '--user',
                             help='MZ user (default mzadmin)')
 vcimport_parser = subparsers.add_parser(
     'vcimport',
-    help='Import from files')
+    help='Import configuration from files in Version Control format')
 vcimport_parser.set_defaults(func=vcimport.run_vcimport)
 vcimport_parser.add_argument('-e', '--environment',
                             required=True,
