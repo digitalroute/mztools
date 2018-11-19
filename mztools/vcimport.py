@@ -4,10 +4,10 @@ import time
 import getpass
 from base64 import standard_b64encode
 
-from .common import tar_directory, run_lambda
+from .common import tar_directory, run_lambda, allow_one
 
 def run_vcimport(args):
-    env = args.environment
+    env = allow_one(args.environment)
     srcdir = args.directory
     if not checkdir(srcdir):
         return False

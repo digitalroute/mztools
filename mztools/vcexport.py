@@ -1,13 +1,13 @@
 from termcolor import colored
-import os, sys
+import os, sys, glob
 import time
 import getpass
 from base64 import standard_b64decode
 
-from .common import untar_bytes, run_lambda
+from .common import untar_bytes, run_lambda, allow_one
 
 def run_vcexport(args):
-    env = args.environment
+    env = allow_one(args.environment)
     destdir = args.directory
     overwrite = args.overwrite
     if not checkdir(destdir, overwrite):
@@ -39,14 +39,20 @@ def run_vcexport(args):
 
     if 'tarfile' not in response or response['tarfile'] is None:
         print(colored('The remote function failed:','red'))
-        print(response)
         return False
     tarbytes = response['tarfile']
+    if len(response['stdout']) > 0:
+        print(colored(response['stdout'],'blue'))
+    if len(response['stderr']) > 0:
+        print(colored(response['stderr'],'red'))
     if not untar_bytes(standard_b64decode(tarbytes), destdir):
         print(colored("There were some errors unpacking files locally", 'red'))
         return False
-    print(colored('Files have been written to directory "' + destdir + "'", 'green'))
-    return True
+    if checkexportok(destdir, args.folders):
+        print(colored('Files have been written to directory "' + destdir + "'", 'green'))
+        return True
+    else:
+        return False
 
 def checkdir(destdir, overwrite):
     if not os.path.isdir(destdir):
@@ -55,13 +61,30 @@ def checkdir(destdir, overwrite):
                 'red', attrs=['bold']))
             return False
         else:
-            print (colored('Destination directory `'+destdir+'` does not exist',
-                'red', attrs=['bold']))
-            return False
+            try:
+                os.mkdir(destdir, 0o755)
+            except Exception as e:
+                sys.stderr.write(e)
+                return False
+            return True
     if not overwrite:
         for filename in os.listdir(destdir):
             if filename[0] != '.':
                 print (colored('Destination directory `'+destdir+'` is not empty and overwrite (dangerous!) was not specified',
                     'red', attrs=['bold']))
                 return False
+    return True
+
+def listdir_nohidden(dirtolist):
+    return list(map(lambda x: os.path.basename(x),glob.glob(os.path.join(dirtolist, '*'))))
+
+def checkexportok(destdir, folders):
+    created_dirs = listdir_nohidden(destdir)
+    if len(created_dirs) < 1:
+        print(colored('Export did not yield any folders', 'red'))
+        return False
+    if folders:
+        for f in folders:
+            if f not in created_dirs:
+                sys.stderr.write('Warning: folder "' + f + '" was not found in the export\n')
     return True
