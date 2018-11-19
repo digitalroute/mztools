@@ -40,9 +40,10 @@ def run_vcimport(args):
         'mzuserpasswd': mzuser+'/'+mzpasswd,
         'mzsh_extraargs': mzsh_extraargs
     })
+    if 'mzsh_stderr' in response and len(response['mzsh_stderr']) > 0:
+        print(colored(response['mzsh_stderr'], 'red'))
     if not 'mzsh_stdout' in response or len(response['mzsh_stdout']) < 3:
         print(colored("Import failed to execute mzsh", 'red'))
-        print(response)
         return False
     print(colored(response['mzsh_stdout'].rstrip(), 'blue'))
     return True
