@@ -378,7 +378,7 @@ def list_s3_bucket_dirs(bucketname):
     return list(set(map(lambda o: o.key.rsplit('/')[0], bucket.objects.all())))
 
 def untar_bytes(bytes, destdir):
-    tarpipe = Popen(["tar", "-C", destdir, "-xf", "-"], stdin=PIPE)
+    tarpipe = Popen(["tar", "-C", destdir, "-xzf", "-"], stdin=PIPE)
     tarpipe.stdin.write(bytes)
     tarpipe.stdin.close()
     if tarpipe.wait() != 0:
@@ -386,7 +386,7 @@ def untar_bytes(bytes, destdir):
     return True
 
 def tar_directory(srcdir):
-    tarpipe = Popen(["tar", "-C", srcdir, "-cf", "-", "."], stdout=PIPE)
+    tarpipe = Popen(["tar", "-C", srcdir, "-czf", "-", "."], stdout=PIPE)
     bytes = tarpipe.stdout.read()
     tarpipe.stdout.close()
     if tarpipe.wait() != 0:

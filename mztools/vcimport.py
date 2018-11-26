@@ -44,6 +44,8 @@ def run_vcimport(args):
         print(colored(response['mzsh_stderr'], 'red'))
     if not 'mzsh_stdout' in response or len(response['mzsh_stdout']) < 3:
         print(colored("Import failed to execute mzsh", 'red'))
+        if 'errorMessage' in response:
+            print(colored('Lambda error: '+ response['errorMessage'],'red'))
         return False
     print(colored(response['mzsh_stdout'].rstrip(), 'blue'))
     return True

@@ -45,6 +45,8 @@ def run_vcexport(args):
         print(colored(response['stdout'],'blue'))
     if len(response['stderr']) > 0:
         print(colored(response['stderr'],'red'))
+    if 'errorMessage' in response:
+        print(colored('Lambda error: '+ response['errorMessage'],'red'))
     if not untar_bytes(standard_b64decode(tarbytes), destdir):
         print(colored("There were some errors unpacking files locally", 'red'))
         return False
