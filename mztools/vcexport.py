@@ -4,7 +4,7 @@ import time
 import getpass
 from base64 import standard_b64decode
 
-from .common import untar_bytes, run_lambda, allow_one
+from .common import untar_bytes, run_lambda, allow_one, s3_fetch_bytes
 
 def run_vcexport(args):
     env = allow_one(args.environment)
@@ -39,15 +39,17 @@ def run_vcexport(args):
 
     if 'tarfile' not in response or response['tarfile'] is None:
         print(colored('The remote function failed:','red'))
+        if 'errorMessage' in response:
+            print(colored('Lambda error: '+ response['errorMessage'],'red'))
         return False
-    tarbytes = response['tarfile']
+    tarbytes = s3_fetch_bytes(response['tarfile'])
     if len(response['stdout']) > 0:
         print(colored(response['stdout'],'blue'))
     if len(response['stderr']) > 0:
         print(colored(response['stderr'],'red'))
     if 'errorMessage' in response:
         print(colored('Lambda error: '+ response['errorMessage'],'red'))
-    if not untar_bytes(standard_b64decode(tarbytes), destdir):
+    if not untar_bytes(tarbytes, destdir):
         print(colored("There were some errors unpacking files locally", 'red'))
         return False
     if checkexportok(destdir, args.folders):
