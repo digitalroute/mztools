@@ -274,6 +274,7 @@ vcimport_parser.add_argument('-f', '--folders',
                             nargs='+',
                             help='Folders to import, default all in import directory.')
 vcimport_parser.add_argument('-m', '--message',
+                            metavar='message',
                             nargs='?',
                             help='Add a message to identify the import')
 vcimport_parser.add_argument('-u', '--user',
