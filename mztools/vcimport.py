@@ -2,9 +2,8 @@ from termcolor import colored
 import os
 import time
 import getpass
-from base64 import standard_b64encode
 
-from .common import tar_directory, run_lambda, allow_one
+from .common import tar_directory, run_lambda, allow_one, s3_put_bytes, get_parameter
 
 def run_vcimport(args):
     env = allow_one(args.environment)
@@ -34,8 +33,10 @@ def run_vcimport(args):
     if args.folders:
         mzsh_extraargs+= " -f " + ' '.join(args.folders)
 
+    transfer_bucket = get_parameter('/'+env+'/mztools-transfer-bucket')
+    s3path = s3_put_bytes(tarbytes, transfer_bucket)
     response = run_lambda('paas-tools-lambda_mzsh-vcimport', {
-        'tarfile': standard_b64encode(tarbytes).decode('ascii'),
+        'tarfile': s3path,
         'env': env,
         'mzuserpasswd': mzuser+'/'+mzpasswd,
         'mzsh_extraargs': mzsh_extraargs

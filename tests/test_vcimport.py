@@ -19,6 +19,8 @@ class TestVcimport(unittest.TestCase):
 
      self.monkeypatch.setattr('mztools.vcimport.run_lambda', lambda a,b: self.lambdaMock.run_lambda())
      self.monkeypatch.setattr('mztools.vcimport.tar_directory', lambda a: standard_b64decode("UGF4SGVhZGVyL2VtcHR5AAAAAAA="))
+     self.monkeypatch.setattr('mztools.vcimport.get_parameter', lambda a: "value")
+     self.monkeypatch.setattr('mztools.vcimport.s3_put_bytes', lambda a,b: "s3://dummybucket/dummyobj")
 
     @patch('mztools.common.boto3')
     @patch('getpass.getpass')

@@ -8,7 +8,7 @@ import os
 import time
 import shutil
 import tempfile
-import re
+import re, uuid
 
 import boto3
 import botocore
@@ -411,3 +411,25 @@ def s3_fetch_bytes(path):
         Key    = key
     )
     return response['Body'].read()
+
+def s3_put_bytes(bytes, bucketname):
+    key = str(uuid.uuid4()) + '.tgz'
+    client = boto3.client('s3')
+    response = client.put_object(
+        ACL    = 'private',
+        Body   = bytes,
+        Bucket = bucketname,
+        Key    = key
+    )
+    return 's3://'+ bucketname + '/' + key
+
+def s3_delete_path(path):
+    m      = re.match(r"s3://([^/]+)/(.*)", path)
+    bucket = m.group(1)
+    key    = m.group(2)
+
+    client = boto3.client('s3')
+    response = client.delete_object(
+        Bucket = bucket,
+        Key    = key
+    )
