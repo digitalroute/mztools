@@ -13,13 +13,15 @@ class TestVcexport(unittest.TestCase):
      self.monkeypatch = MonkeyPatch()
      self.lambdaMock = Mock()
      self.lambdaMock.run_lambda.return_value = {
-        "tarfile": "UGF4SGVhZGVyL2VtcHR5AAAAAAA=",
+        "tarfile": "s3://dr-dummy/239482934-37482abc.tgz",
         "stdout": "OK",
         "stderr": ""
      }
 
      self.monkeypatch.setattr('mztools.vcexport.run_lambda', lambda a,b: self.lambdaMock.run_lambda())
      self.monkeypatch.setattr('mztools.vcexport.untar_bytes', lambda a,b: True)
+     self.monkeypatch.setattr('mztools.vcexport.s3_fetch_bytes', lambda a: "")
+     self.monkeypatch.setattr('mztools.vcexport.s3_delete_path', lambda a: True)
 
     @patch('sys.stderr')
     @patch('os.listdir')

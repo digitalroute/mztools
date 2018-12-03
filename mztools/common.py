@@ -8,6 +8,7 @@ import os
 import time
 import shutil
 import tempfile
+import re, uuid
 
 import boto3
 import botocore
@@ -378,7 +379,7 @@ def list_s3_bucket_dirs(bucketname):
     return list(set(map(lambda o: o.key.rsplit('/')[0], bucket.objects.all())))
 
 def untar_bytes(bytes, destdir):
-    tarpipe = Popen(["tar", "-C", destdir, "-xf", "-"], stdin=PIPE)
+    tarpipe = Popen(["tar", "-C", destdir, "-xzf", "-"], stdin=PIPE)
     tarpipe.stdin.write(bytes)
     tarpipe.stdin.close()
     if tarpipe.wait() != 0:
@@ -386,7 +387,7 @@ def untar_bytes(bytes, destdir):
     return True
 
 def tar_directory(srcdir):
-    tarpipe = Popen(["tar", "-C", srcdir, "-cf", "-", "."], stdout=PIPE)
+    tarpipe = Popen(["tar", "-C", srcdir, "-czf", "-", "."], stdout=PIPE)
     bytes = tarpipe.stdout.read()
     tarpipe.stdout.close()
     if tarpipe.wait() != 0:
@@ -398,3 +399,37 @@ def allow_one(thelist):
         print(colored('Only one is allowed - ' + '|'.join(thelist), 'red'))
         sys.exit(1)
     return thelist[0]
+
+def s3_fetch_bytes(path):
+    m      = re.match(r"s3://([^/]+)/(.*)", path)
+    bucket = m.group(1)
+    key    = m.group(2)
+
+    client = boto3.client('s3')
+    response = client.get_object(
+        Bucket = bucket,
+        Key    = key
+    )
+    return response['Body'].read()
+
+def s3_put_bytes(bytes, bucketname):
+    key = str(uuid.uuid4()) + '.tgz'
+    client = boto3.client('s3')
+    response = client.put_object(
+        ACL    = 'private',
+        Body   = bytes,
+        Bucket = bucketname,
+        Key    = key
+    )
+    return 's3://'+ bucketname + '/' + key
+
+def s3_delete_path(path):
+    m      = re.match(r"s3://([^/]+)/(.*)", path)
+    bucket = m.group(1)
+    key    = m.group(2)
+
+    client = boto3.client('s3')
+    response = client.delete_object(
+        Bucket = bucket,
+        Key    = key
+    )
