@@ -8,9 +8,12 @@ import os
 import time
 import shutil
 import tempfile
+import re, uuid
 
 import boto3
 import botocore
+
+from subprocess import DEVNULL, Popen, PIPE
 
 from datetime import datetime
 from termcolor import colored
@@ -123,9 +126,9 @@ def run_lambda(function, payload={}):
             LogType='Tail',
             Payload=json.dumps(payload)
         )
-    except botocore.exceptions.PartialCredentialsError as e:
-        print('Not allowed to trigger backend, have you assumed the correct role?')
-        print('AWS Error: ', e)
+    except (botocore.exceptions.PartialCredentialsError, botocore.exceptions.ClientError) as e:
+        print(colored('Not allowed to trigger backend, have you assumed the correct role?', 'red', attrs=['bold']))
+        print(colored('AWS Error:', 'red'), colored(e,'red'))
         sys.exit(1)
 
     # Load the response, decoded with json
@@ -345,7 +348,13 @@ def get_parameter(param):
             WithDecryption=False
         )['Parameter']['Value']
         return response
-    except botocore.exceptions.ClientError:
+    except botocore.exceptions.ClientError as e:
+        if 'ExpiredTokenException' in str(e):
+            print(colored('Your AWS Token has expired. Please renew it','red'))
+            sys.exit(1)
+        if 'AccessDeniedException' in str(e):
+            print(colored('Access to AWS parameterstore was denied. `aws configure`?','red'))
+            sys.exit(1)
         return '-'
 
 def run_delete_operation(filesDict, verified=False):
@@ -364,3 +373,63 @@ def run_delete_operation(filesDict, verified=False):
         filesOperated[fileType] = response
 
     return(filesOperated)
+
+def list_s3_bucket_dirs(bucketname):
+    bucket=boto3.resource('s3').Bucket(bucketname)
+    return list(set(map(lambda o: o.key.rsplit('/')[0], bucket.objects.all())))
+
+def untar_bytes(bytes, destdir):
+    tarpipe = Popen(["tar", "-C", destdir, "-xzf", "-"], stdin=PIPE)
+    tarpipe.stdin.write(bytes)
+    tarpipe.stdin.close()
+    if tarpipe.wait() != 0:
+        return False
+    return True
+
+def tar_directory(srcdir):
+    tarpipe = Popen(["tar", "-C", srcdir, "-czf", "-", "."], stdout=PIPE)
+    bytes = tarpipe.stdout.read()
+    tarpipe.stdout.close()
+    if tarpipe.wait() != 0:
+        return None
+    return bytes
+
+def allow_one(thelist):
+    if len(thelist) != 1:
+        print(colored('Only one is allowed - ' + '|'.join(thelist), 'red'))
+        sys.exit(1)
+    return thelist[0]
+
+def s3_fetch_bytes(path):
+    m      = re.match(r"s3://([^/]+)/(.*)", path)
+    bucket = m.group(1)
+    key    = m.group(2)
+
+    client = boto3.client('s3')
+    response = client.get_object(
+        Bucket = bucket,
+        Key    = key
+    )
+    return response['Body'].read()
+
+def s3_put_bytes(bytes, bucketname):
+    key = str(uuid.uuid4()) + '.tgz'
+    client = boto3.client('s3')
+    response = client.put_object(
+        ACL    = 'private',
+        Body   = bytes,
+        Bucket = bucketname,
+        Key    = key
+    )
+    return 's3://'+ bucketname + '/' + key
+
+def s3_delete_path(path):
+    m      = re.match(r"s3://([^/]+)/(.*)", path)
+    bucket = m.group(1)
+    key    = m.group(2)
+
+    client = boto3.client('s3')
+    response = client.delete_object(
+        Bucket = bucket,
+        Key    = key
+    )

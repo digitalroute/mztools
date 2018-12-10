@@ -31,9 +31,7 @@ def run_list(args):
             'backups'
         ])
 
-    list_files(argsList)
-
-    return
+    return list_files(argsList)
 
 
 def list_files(argsList):
@@ -41,6 +39,11 @@ def list_files(argsList):
 
     # Get files
     files = get_file_list(argsList)
+
+    if "errorMessage" in files.keys():
+        print ('Unable to list files, reason: ' + files['errorMessage'])
+        print ('Please try again...')
+        return False
 
     name_col_width = 40
     size_col_width = 15
@@ -54,27 +57,28 @@ def list_files(argsList):
 
     # Print files
     for fileType in argsList:
-        if len(files[fileType]) > 0:
-            print(colored('\n  ' + fileType.capitalize() + ':',
-                  attrs=['bold']))
-            for f in files[fileType]:
-                name = f['name']
+        if fileType in files.keys():
+            if len(files[fileType]) > 0:
+                print(colored('\n  ' + fileType.capitalize() + ':',
+                      attrs=['bold']))
+                for f in files[fileType]:
+                    name = f['name']
 
-                if name:
-                    lineName = '    ' + name.ljust(name_col_width)
-                    lineSize = f['size'].ljust(size_col_width)
-                    lineModified = f['modified'].ljust(modified_col_width)
+                    if name:
+                        lineName = '    ' + name.ljust(name_col_width)
+                        lineSize = f['size'].ljust(size_col_width)
+                        lineModified = f['modified'].ljust(modified_col_width)
 
-                    # If filename is too long, add a new line
-                    if len(name) > 40:
-                        print(lineName)
-                        print(
-                            ''.ljust(name_col_width + 4)
-                            + lineSize + lineModified)
-                    else:
-                        print(lineName + lineSize + lineModified)
+                        # If filename is too long, add a new line
+                        if len(name) > 40:
+                            print(lineName)
+                            print(
+                                ''.ljust(name_col_width + 4)
+                                + lineSize + lineModified)
+                        else:
+                            print(lineName + lineSize + lineModified)
 
     print(colored('\n  To build a new container run "mztools build"\n',
                   attrs=['dark']))
 
-    return()
+    return True

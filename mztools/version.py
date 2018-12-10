@@ -9,7 +9,7 @@ def run_version():
     print('Fetching versions...\n')
     list_version()
 
-    return
+    return True
 
 
 def list_version():

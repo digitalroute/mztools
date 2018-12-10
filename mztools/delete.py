@@ -49,4 +49,4 @@ def run_delete(args):
     print(colored('\nTo list files run "mztools list"\n',
                   attrs=['dark']))
 
-    return
+    return True

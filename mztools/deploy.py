@@ -6,6 +6,33 @@ from time import sleep
 from termcolor import colored
 from .common import run_lambda, SpinCursor, poll_build, get_parameter
 
+def get_pod_name(env, container):
+
+    pod_name = ''
+    response = run_lambda('paas-tools-lambda_get-status', {
+        'environment': env
+    })
+
+    try:
+        for pod in response['status']:
+            instance_name = pod.get('instance_name','Not available')
+
+            if instance_name.startswith(container+'-'):
+                pod_name = instance_name
+
+    except KeyError as e:
+        print('  Unable to get ' + container + ' status.')
+
+    return pod_name
+
+def restart_pod(env, name):
+
+    res = run_lambda('paas-tools-lambda_restart-pico', {
+        'environment': env,
+        'name': name
+    })
+    print('  Restarting wd instance' + res + '\n')
+    return
 
 def run_deploy(args):
     if args.no_ec:
@@ -17,7 +44,7 @@ def run_deploy(args):
         if check_version(args.test[0], 'test'):
             print('You are trying to deploy the same version again.')
             print('Please pick another version to deploy.')
-            return
+            return False
 
         print('Triggering deploy...\n')
         deploy_container(ec, 'test', args.test[0])
@@ -25,7 +52,7 @@ def run_deploy(args):
         if check_version(get_parameter('/test/platform/version'), 'prod'):
             print('You are trying to deploy the same version again.')
             print('Deploy a another version to test for the ability to promote.')
-            return
+            return False
 
         question = '\nAre you sure you want to promote test to production? '
         question += '[yes/no]: '
@@ -42,7 +69,7 @@ def run_deploy(args):
         if check_version(args.dev[0], 'dev'):
             print('You are trying to deploy the same version again.')
             print('Please pick another version to deploy.')
-            return
+            return False
 
         if args.reset:
             reset = True
@@ -67,7 +94,7 @@ def run_deploy(args):
 
         deploy_container(ec, 'dev', args.dev[0], reset)
 
-    return
+    return True
 
 
 def check_version(version, env):
@@ -115,6 +142,12 @@ def deploy_container(ec, environment=None, version=None, reset=False):
             print(colored('Unknown', 'yellow', attrs=['bold']))
 
     print('')
+
+    pod_name = get_pod_name(environment, 'wd')
+    if pod_name:
+        restart_pod(environment, pod_name)
+    else:
+        print('  Please restart web desktop in the ' + environment + ' environment.\n')
 
     if environment == 'test':
         print(colored('  To promote test to prod run "mztools deploy -p"\n',

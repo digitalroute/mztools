@@ -9,7 +9,7 @@ def run_build(args):
     if check_version(args.version):
         print('You are trying to build using the same version number again.')
         print('Please use another version number to build.')
-        return
+        return False
 
     if args.no_ec:
         ec = False
@@ -18,9 +18,9 @@ def run_build(args):
 
     if args.version:
         print('Triggering build...\n')
-        trigger_build(args.version, ec)
+        return trigger_build(args.version, ec)
 
-    return
+    return True
 
 def check_version(version):
     version_used = False
@@ -43,7 +43,7 @@ def trigger_build(version, ec):
 
     if 'error' in build_response:
         print(colored(build_response['error'], 'red'))
-        return
+        return False
     else:
         buildId = build_response['buildId']
 
@@ -74,15 +74,15 @@ def trigger_build(version, ec):
             print(colored('To deploy a new version run "mztools deploy"\n',
                           attrs=['dark']))
 
-            break
+            return True
         elif status['buildStatus'] in failedStates:
             spin.stop()
             spin.join()
             print(colored('\n  Build failed!\n', 'red'))
             fetch_log(buildId)
-            break
+            return False
 
-    return
+    return False
 
 
 def fetch_log(buildId):

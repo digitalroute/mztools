@@ -44,7 +44,7 @@ def run_get(args):
     print(colored('\n  To list files run "mztools list"\n',
                   attrs=['dark']))
 
-    return
+    return True
 
 
 def get_all_files(bucket, type):

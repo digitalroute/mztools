@@ -28,7 +28,7 @@ def run_status(args):
         print('Fetching status...\n')
         get_status(args)
 
-    return
+    return True
 
 
 def get_status(args):
