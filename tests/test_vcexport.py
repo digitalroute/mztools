@@ -25,8 +25,7 @@ class TestVcexport(unittest.TestCase):
 
     @patch('sys.stderr')
     @patch('os.listdir')
-    @patch('glob.glob')
-    def test_warning_when_not_all_folders_exported(self, glob, listdir, mock_stderr):
+    def test_warning_when_not_all_folders_exported(self, listdir, mock_stderr):
             args = Namespace(**{
                 "environment": ["test"],
                 "directory": "mocktmpdir",
@@ -36,16 +35,15 @@ class TestVcexport(unittest.TestCase):
                 "user": "user/passwd",
                 "folders": [ "Examples", "Defaults" ]
             })
-
             listdir.return_value = []
-            glob.return_value = [ "Examples" ]
+            with self.monkeypatch.context() as m:
+                m.setattr('mztools.vcexport.listdir_nohidden', lambda a: [ "Examples" ])
 
-            result = vcexport.run_vcexport(args)
+                result = vcexport.run_vcexport(args)
 
-            self.assertEqual(listdir.called, True)
-            mock_stderr.assert_has_calls([
-                unittest.mock.call.write('Warning: folder "Defaults" was not found in the export' + "\n")
-            ])
+                mock_stderr.assert_has_calls([
+                    unittest.mock.call.write('Warning: folder "Defaults" was not found in the export' + "\n")
+                ])
 
     @patch('getpass.getpass')
     @patch('os.listdir')

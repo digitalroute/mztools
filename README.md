@@ -1,4 +1,5 @@
 # mztools
+[![Build Status](https://travis-ci.org/digitalroute/mztools.svg?branch=master)](https://travis-ci.org/digitalroute/mztools)
 
 ## Introduction
 
