@@ -211,9 +211,6 @@ log_parser.set_defaults(func=log.run_log)
 log_parser.add_argument('-e', '--environment',
                         choices=['dev', 'test', 'prod'],
                         help='Get logs from which environment')
-log_parser.add_argument('--json',
-                        action='store_true',
-                        help='Json format to file')
 restart_parser = subparsers.add_parser(
     'restart',
     help='Restart pico')
