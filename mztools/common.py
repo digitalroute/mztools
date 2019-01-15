@@ -139,10 +139,20 @@ def run_lambda(function, payload={}):
 
     return json_response
 
+# get log events from cloudwatch
+# logGroup: CloudWatch log logGroup
+# prefix: log stream prefixed
+# timeWindow: if many streams have events within this many seconds
+#             use events from all streams.
+def get_log_stream_events(logGroup, prefix=None, timeWindow=0):
 
-def get_log_stream(logGroup, prefix=None):
+    if prefix is not None and timeWindow > 0:
+        print(colored('  prefix and timeWindow can currently not be used together\n', 'red'))
+        return()
+
     client = boto3.client('logs')
 
+    logStreams = []
     try:
         # Get last log stream or prefixed log stream
         if prefix:
@@ -174,36 +184,43 @@ def get_log_stream(logGroup, prefix=None):
                         nextToken = response['nextToken']
 
         else:
+            logStreamLimit = 3
+            if timeWindow == 0:
+                logStreamLimit = 1
             response = client.describe_log_streams(
                 logGroupName=logGroup,
                 orderBy='LastEventTime',
                 descending=True,
-                limit=1
+                limit=logStreamLimit
             )
 
-        logStream = response['logStreams'][0]['logStreamName']
+        # lastEventTimestamp is in milliseconds
+        windowStart = response['logStreams'][0]['lastEventTimestamp'] - timeWindow*1000
+
+        for ls in response['logStreams']:
+            if ls['lastEventTimestamp'] >= windowStart:
+                logStreams.append(ls['logStreamName'])
 
     except (IndexError, client.exceptions.ResourceNotFoundException):
         print(colored('  Log not found!\n', 'red'))
         return()
 
-    # Get log events
-    response = client.get_log_events(
-        logGroupName=logGroup,
-        logStreamName=logStream,
-        startFromHead=False
-        )
-
-    # Add all formatted lines to a list of lines
+# Add all formatted lines to a list of lines
     logEvents = []
-    for event in response['events']:
-        timeStamp = datetime.fromtimestamp(event['timestamp']/1000.0)\
-            .strftime('%c')
-        logEvents.append("{} - {}".format(
-            timeStamp,
-            event['message'].rstrip('\n')
+    for ls in logStreams:
+        response = client.get_log_events(
+            logGroupName=logGroup,
+            logStreamName=ls,
+            startFromHead=False
             )
-        )
+        for event in response['events']:
+            timeStamp = datetime.fromtimestamp(event['timestamp']/1000.0)\
+                .strftime('%c')
+            logEvents.append("{} - {}".format(
+                timeStamp,
+                event['message'].rstrip('\n')
+                )
+            )
 
     return(logEvents)
 

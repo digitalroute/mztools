@@ -2,7 +2,7 @@
 import boto3
 import json
 from termcolor import colored
-from .common import run_lambda, get_log_stream
+from .common import run_lambda, get_log_stream_events
 
 
 def run_log(args):
@@ -17,7 +17,7 @@ def run_log(args):
 def get_log(args):
     env = args.environment
 
-    logEvents = get_log_stream('/' + env + '/platform')
+    logEvents = get_log_stream_events('/' + env + '/platform')
 
     for line in logEvents:
         splitLine = line.split(' - ', 1)
