@@ -2,7 +2,7 @@
 import boto3
 from termcolor import colored
 from time import sleep
-from .common import run_lambda, SpinCursor, poll_build, get_log_stream
+from .common import run_lambda, SpinCursor, poll_build, get_log_stream_events
 
 
 def run_build(args):
@@ -99,7 +99,7 @@ def fetch_log(buildId):
 
     print('...done')
     print('    Fetching log stream...', end='', flush=True)
-    logEvents = get_log_stream('/aws/codebuild/paas-platform-build')
+    logEvents = get_log_stream_events('/aws/codebuild/paas-platform-build')
     fileName = buildId.split(':', maxsplit=1)[1] + '.log'
     with open(fileName, 'w') as logFile:
         for line in logEvents:

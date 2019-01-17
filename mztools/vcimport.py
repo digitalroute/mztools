@@ -1,9 +1,9 @@
 from termcolor import colored
-import os
+import os, sys
 import time
 import getpass
 
-from .common import tar_directory, run_lambda, allow_one, s3_put_bytes, get_parameter
+from .common import tar_directory, run_lambda, allow_one, s3_put_bytes, get_parameter, get_log_stream_events
 
 def run_vcimport(args):
     env = allow_one(args.environment)
@@ -41,15 +41,37 @@ def run_vcimport(args):
         'mzuserpasswd': mzuser+'/'+mzpasswd,
         'mzsh_extraargs': mzsh_extraargs
     })
-    if 'mzsh_stderr' in response and len(response['mzsh_stderr']) > 0:
-        print(colored(response['mzsh_stderr'], 'red'))
-    if not 'mzsh_stdout' in response or len(response['mzsh_stdout']) < 3:
+    # Lambda functions can be run multiple times for the same invokation
+    # If the response we have is from an invokation that was redundant,
+    # we must fetch the result from a cloudwatch log
+    if 'mzsh_stdout' in response and response['mzsh_stdout'].rstrip() == "see cloudwatch log for details":
+        print(colored("Waiting 30s for import log to appear", 'green'))
+        time.sleep(30)
+        mzsh_out = get_mzsh_import_log()
+    else:
+        mzsh_out = response
+    if 'mzsh_stderr' in mzsh_out and len(mzsh_out['mzsh_stderr']) > 0:
+        print(colored(mzsh_out['mzsh_stderr'], 'red'))
+    if not 'mzsh_stdout' in mzsh_out or len(mzsh_out['mzsh_stdout']) < 3:
         print(colored("Import failed to execute mzsh", 'red'))
         if 'errorMessage' in response:
             print(colored('Lambda error: '+ response['errorMessage'],'red'))
         return False
-    print(colored(response['mzsh_stdout'].rstrip(), 'blue'))
+    print(colored(mzsh_out['mzsh_stdout'].rstrip(), 'blue'))
     return True
+
+def get_mzsh_import_log():
+    logEvents = get_log_stream_events('/aws/lambda/paas-tools-lambda_mzsh-vcimport', timeWindow=120)
+
+    out = { "mzsh_stderr": "", "mzsh_stdout": "" }
+    for line in logEvents:
+        splitStdout = line.split('mzsh_stdout>>', 1)
+        if len(splitStdout) > 1:
+            out["mzsh_stdout"] += splitStdout[1] + "\n"
+        splitStderr = line.split('mzsh_stderr>>', 1)
+        if len(splitStderr) > 1:
+            out["mzsh_stderr"] += splitStderr[1] + "\n"
+    return out
 
 def checkdir(srcdir):
     if not os.path.isdir(srcdir):
