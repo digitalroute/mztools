@@ -21,6 +21,7 @@ def run_restart(args):
         for n in containers:
             if re.search(n, name, re.IGNORECASE):
                 valid = True
+                break
 
         if not valid:
             print('Enter a valid pico name for restart')
@@ -37,7 +38,7 @@ def run_restart(args):
         for pod in response['status']:
             instance_name = pod.get('instance_name','Not available')
             container_name = instance_name.split('-')[0]
-            if container_name.lower() == name.lower():
+            if container_name.lower() == name.lower() or instance_name.lower() == name.lower():
                 pod_found = True
                 res = run_lambda('paas-tools-lambda_restart-pico', {
                     'environment': env,
