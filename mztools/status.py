@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 import boto3
 import json
+import re
 from ast import literal_eval
 from termcolor import colored
 from .common import run_lambda
 
 # Containers to display
 containers = (
-    'platform-',
-    'ec-',
-    'wd-'
+    '^platform$',
+    '^ec[0-9]*$',
+    '^wd$'
 )
 
 
@@ -58,14 +59,20 @@ def get_status(args):
 
     try:
         for pod in response['status']:
+            container_name = pod.get('name','Not available')
             instance_name = pod.get('instance_name','Not available')
-            if instance_name.startswith(containers):
+            display = False
+            for n in containers:
+                if re.search(n, container_name, re.IGNORECASE):
+                    display = True
+                    break
+            if display:
 
                 # Instance name
                 if verbose:
                     line = instance_name.ljust(columnWidth)
                 else:
-                    line = instance_name.split('-')[0]\
+                    line = container_name.split('-')[0]\
                         .ljust(columnWidth)
 
                 # Image name and version
