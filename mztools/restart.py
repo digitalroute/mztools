@@ -18,8 +18,11 @@ def run_restart(args):
 
         # validate name
         valid = False
+        tmp_name = name
+        if tmp_name.find("-") >= 0:
+            tmp_name = name[:tmp_name.find("-")]
         for n in containers:
-            if re.search(n, name, re.IGNORECASE):
+            if re.search(n, tmp_name, re.IGNORECASE):
                 valid = True
                 break
 
