@@ -35,10 +35,6 @@ def restart_pod(env, name):
     return
 
 def run_deploy(args):
-    if args.no_ec:
-        ec = False
-    else:
-        ec = True
 
     if args.test:
         if check_version(args.test[0], 'test'):
@@ -47,7 +43,7 @@ def run_deploy(args):
             return False
 
         print('Triggering deploy...\n')
-        deploy_container(ec, 'test', args.test[0])
+        deploy_container('test', args.test[0])
     if args.promote:
         if check_version(get_parameter('/test/platform/version'), 'prod'):
             print('You are trying to deploy the same version again.')
@@ -64,7 +60,7 @@ def run_deploy(args):
             verification = input(question)
 
         print('Promoting test to production...\n')
-        deploy_container(ec, 'prod')
+        deploy_container('prod')
     if args.dev:
         if check_version(args.dev[0], 'dev'):
             print('You are trying to deploy the same version again.')
@@ -92,7 +88,7 @@ def run_deploy(args):
         else:
             reset = False
 
-        deploy_container(ec, 'dev', args.dev[0], reset)
+        deploy_container('dev', args.dev[0], reset)
 
     return True
 
@@ -106,7 +102,7 @@ def check_version(version, env):
         return True
     return False
 
-def deploy_container(ec, environment=None, version=None, reset=False):
+def deploy_container(environment=None, version=None, reset=False):
 
     if environment == 'prod':
         msg = 'Promoting test to prod...'
@@ -118,7 +114,6 @@ def deploy_container(ec, environment=None, version=None, reset=False):
     response = run_lambda('paas-tools-lambda_post-deploy', {
         'version': version,
         'env': environment,
-        'ec': ec,
         'reset': reset
     })
 
@@ -131,15 +126,14 @@ def deploy_container(ec, environment=None, version=None, reset=False):
     except KeyError:
         print(colored('Unknown', 'yellow', attrs=['bold']))
 
-    if ec:
-        try:
-            print('    EC'.ljust(20), end='')
-            if response['ec']['Status'] == "Failed":
-                print(colored('Failed!', 'red', attrs=['bold']))
-            elif response['ec']['Status'] == "Success":
-                print(colored('OK', 'green', attrs=['bold']))
-        except KeyError:
-            print(colored('Unknown', 'yellow', attrs=['bold']))
+    try:
+        print('    EC'.ljust(20), end='')
+        if response['ec']['Status'] == "Failed":
+            print(colored('Failed!', 'red', attrs=['bold']))
+        elif response['ec']['Status'] == "Success":
+            print(colored('OK', 'green', attrs=['bold']))
+    except KeyError:
+        print(colored('Unknown', 'yellow', attrs=['bold']))
 
     print('')
 
