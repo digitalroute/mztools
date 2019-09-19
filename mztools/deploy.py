@@ -127,6 +127,15 @@ def deploy_container(environment=None, version=None, reset=False):
         print(colored('Unknown', 'yellow', attrs=['bold']))
 
     try:
+        print('    WebDesktop'.ljust(20), end='')
+        if response['webdesktop']['Status'] == "Failed":
+            print(colored('Failed!', 'red', attrs=['bold']))
+        elif response['webdesktop']['Status'] == "Success":
+            print(colored('OK', 'green', attrs=['bold']))
+    except KeyError:
+        print(colored('Unknown', 'yellow', attrs=['bold']))
+
+    try:
         print('    EC'.ljust(20), end='')
         if response['ec']['Status'] == "Failed":
             print(colored('Failed!', 'red', attrs=['bold']))
@@ -136,12 +145,6 @@ def deploy_container(environment=None, version=None, reset=False):
         print(colored('Unknown', 'yellow', attrs=['bold']))
 
     print('')
-
-    pod_name = get_pod_name(environment, 'wd')
-    if pod_name:
-        restart_pod(environment, pod_name)
-    else:
-        print('  Please restart web desktop in the ' + environment + ' environment.\n')
 
     if environment == 'test':
         print(colored('  To promote test to prod run "mztools deploy -p"\n',
