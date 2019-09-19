@@ -11,11 +11,8 @@ def run_build(args):
         print('Please use another version number to build.')
         return False
 
-    if args.no_ec:
-        ec = False
-    else:
-        ec = True
-
+    # Now always build desktop and ec along with platform
+    ec = True
     if args.version:
         print('Triggering build...\n')
         return trigger_build(args.version, ec)
