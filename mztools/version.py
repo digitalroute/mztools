@@ -19,7 +19,7 @@ def list_version():
     filesDict = run_lambda('paas-tools-lambda_get-versions')
 
     print(colored('  Current version in:', attrs=['bold']))
-    print('    Production:   ' + filesDict['current_prod_version'])
+    print('    Prod:         ' + filesDict['current_prod_version'])
     print('    Test:         ' + filesDict['current_test_version'])
     print('    Dev:          ' + filesDict['current_dev_version'])
     print(colored('\n  Available:', attrs=['bold']))
