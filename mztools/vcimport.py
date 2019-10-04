@@ -52,6 +52,7 @@ def run_vcimport(args):
         mzsh_out = response
     if 'mzsh_stderr' in mzsh_out and len(mzsh_out['mzsh_stderr']) > 0:
         print(colored(mzsh_out['mzsh_stderr'], 'red'))
+        return False
     if not 'mzsh_stdout' in mzsh_out or len(mzsh_out['mzsh_stdout']) < 3:
         print(colored("Import failed to execute mzsh", 'red'))
         if 'errorMessage' in response:
