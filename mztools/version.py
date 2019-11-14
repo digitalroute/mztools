@@ -25,14 +25,15 @@ def list_version():
     print(colored('\n  Available:', attrs=['bold']))
 
     i = 0
+    max = 10
     tot_ver = len(filesDict['available'])
 
     # limited to 20 versions. Print out in 10 rows 2 columns format
-    while i < 10:
+    while i < max:
         ver_c1 = filesDict['available'][i]
         ver_c2 = ''
 
-        if i + 10 < tot_ver: # version more than 10 will print at second column
+        if i + max < tot_ver: # version more than 10 will print at second column
             ver_c2 = filesDict['available'][i + 10]
 
         print('    ' + ver_c1.ljust(50) + ver_c2)
