@@ -24,9 +24,6 @@ def list_version():
     print('    Dev:          ' + filesDict['current_dev_version'])
     print(colored('\n  Available:', attrs=['bold']))
 
-    #for version in filesDict['available']:
-    #    print('    ' + version)
-
     i = 0
     tot_ver = len(filesDict['available'])
 
@@ -35,7 +32,7 @@ def list_version():
         ver_c1 = filesDict['available'][i]
         ver_c2 = ''
 
-        if i + 10 < tot_ver: # version more than 10 print at second column
+        if i + 10 < tot_ver: # version more than 10 will print at second column
             ver_c2 = filesDict['available'][i + 10]
 
         print('    ' + ver_c1.ljust(50) + ver_c2)
