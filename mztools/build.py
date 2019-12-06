@@ -6,11 +6,6 @@ from .common import run_lambda, SpinCursor, poll_build, get_log_stream_events
 
 
 def run_build(args):
-    if check_version(args.version):
-        print('You are trying to build using the same version number again.')
-        print('Please use another version number to build.')
-        return False
-
     # Now always build desktop and ec along with platform
     ec = True
     if args.version:
@@ -18,18 +13,6 @@ def run_build(args):
         return trigger_build(args.version, ec)
 
     return True
-
-def check_version(version):
-    version_used = False
-    versions = run_lambda('paas-tools-lambda_get-versions')
-
-    for version_in_lambda in versions['available']:
-        existing_version = version_in_lambda.rsplit(',',1)[0]
-        if version[0] == existing_version:
-            version_used = True
-            break
-
-    return version_used
 
 def trigger_build(version, ec):
     # Trigger codebuild and return result

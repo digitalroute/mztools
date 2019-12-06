@@ -25,3 +25,12 @@ Install tox:
 
 Run tox:
     $ tox
+
+## Compile locally for testing purpose
+
+Run below commands:
+
+    $ python setup.py build
+    $ sudo python setup.py install
+    
+This compiled mztools will be available at `/usr/local/bin/mztools` in your local machine

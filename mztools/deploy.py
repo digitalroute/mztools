@@ -118,31 +118,18 @@ def deploy_container(environment=None, version=None, reset=False):
     })
 
     try:
-        print('    Platform'.ljust(20), end='')
-        if response['platform']['Status'] == "Failed":
-            print(colored('Failed!', 'red', attrs=['bold']))
-        elif response['platform']['Status'] == "Success":
-            print(colored('OK', 'green', attrs=['bold']))
-    except KeyError:
-        print(colored('Unknown', 'yellow', attrs=['bold']))
+        print('    Status'.ljust(15), end='')
+        fontColor = ''
+        if response['Status'] == "Failed":
+            fontColor = 'red'
+        elif response['Status'] == "Success":
+            fontColor = 'green'
+        else:
+            fontColor = 'yellow'
 
-    try:
-        print('    WebDesktop'.ljust(20), end='')
-        if response['webdesktop']['Status'] == "Failed":
-            print(colored('Failed!', 'red', attrs=['bold']))
-        elif response['webdesktop']['Status'] == "Success":
-            print(colored('OK', 'green', attrs=['bold']))
+        print(colored('[ {0} ] {1}'.format(response['Status'], response['RespMessage']), fontColor, attrs=['bold']))
     except KeyError:
-        print(colored('Unknown', 'yellow', attrs=['bold']))
-
-    try:
-        print('    EC'.ljust(20), end='')
-        if response['ec']['Status'] == "Failed":
-            print(colored('Failed!', 'red', attrs=['bold']))
-        elif response['ec']['Status'] == "Success":
-            print(colored('OK', 'green', attrs=['bold']))
-    except KeyError:
-        print(colored('Unknown', 'yellow', attrs=['bold']))
+        print(colored('[Unknown] Internal unknown error', 'yellow', attrs=['bold']))
 
     print('')
 
