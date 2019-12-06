@@ -9,7 +9,7 @@ def run_info(args):
           'white', attrs=['bold']) + get_parameter('/customer/name'))
     print('')
 
-    print(colored('Platform versions: ',
+    print(colored('Deployed versions: ',
           'white', attrs=['bold']))
 
     print('')
@@ -19,14 +19,5 @@ def run_info(args):
     print('Prod: ' + get_parameter('/prod/platform/version'))
 
     print('')
-
-    print(colored('EC versions: ',
-          'white', attrs=['bold']))
-
-    print('')
-
-    print('Dev:  ' + get_parameter('/dev/ec/version'))
-    print('Test: ' + get_parameter('/test/ec/version'))
-    print('Prod: ' + get_parameter('/prod/ec/version'))
 
     return True
