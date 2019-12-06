@@ -8,13 +8,18 @@ from argparse import Namespace
 
 class TestBuild(unittest.TestCase):
     @patch('mztools.common.boto3')
-    def test_return_false_if_build_version_exists(self, boto3):
+    @patch('json.loads')
+    def test_return_false_if_build_version_exists(self, mock_json, boto3):
         args = Namespace(**{ "version" : [ "0.0.1" ], "no_ec": "true"})
         payload = MagicMock()
-        payload.read.return_value.decode.return_value = '{ "available": [ "0.0.1" ]}'
+        #payload.read.return_value.decode.return_value = '{ "available": [ "0.0.1" ]}'
         response = {}
         response['Payload'] = payload
         boto3.client().invoke.return_value = response
+
+        mock_json.side_effect = [
+            {'error': 'You are trying to build using the same version number again.\nPlease use another version number to build.'}
+        ]
 
         result = build.run_build(args)
         self.assertEqual(result,False)
@@ -31,7 +36,7 @@ class TestBuild(unittest.TestCase):
         boto3.client().invoke.return_value = response
 
         mock_json.side_effect = [
-          { 'available': [ "0.0.1" ] },
+          # { 'available': [ "0.0.1" ] },
           { "buildId": "123:mockbuild" },
           { "buildStatus" : "BUILDING" },
           { "buildStatus" : "BUILDING" },
@@ -54,7 +59,7 @@ class TestBuild(unittest.TestCase):
         boto3.client().invoke.return_value = response
 
         mock_json.side_effect = [
-          { 'available': [ "0.0.1" ] },
+          # { 'available': [ "0.0.1" ] },
           { "buildId": "123:mockbuild" },
           { "buildStatus" : "BUILDING" },
           { "buildStatus" : "BUILDING" },
