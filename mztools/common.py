@@ -35,11 +35,12 @@ class SpinCursor(threading.Thread):
         # Speed is given as number of spins a second
         # Use it to calculate spin wait time
         self.waittime = 1.0/float(speed*4)
+        self.spinchars = ('- ', '\ ', '| ', '/ ')
         try:
             if os.environ["PYTHONIOENCODING"] == 'utf-8':
                 self.spinchars = ("◴", "◷", "◶", "◵")
         except KeyError:
-            self.spinchars = ('- ', '\ ', '| ', '/ ')
+                pass
 
         threading.Thread.__init__(self, None, None, "Spin Thread")
 
